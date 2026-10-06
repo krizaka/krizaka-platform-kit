@@ -1,0 +1,8 @@
+Subject: Confirm your e-mail address
+Hello {{username}},
+
+Welcome! Please confirm your e-mail address to activate your account:
+
+{{verificationUrl}}
+
+This link is valid for 15 minutes and can be used once. If you did not create an account, you can ignore this message.
