@@ -32,7 +32,7 @@ tested.
 | Module | Artifact | What it carries |
 |:---|:---|:---|
 | [`krizaka-security`](krizaka-security) | `com.krizaka:krizaka-security` | HS256 session-token verification, `roles`-claim authorities, the **security baseline**, the `SERVICE` token for `/internal/v1/**` |
-| [`krizaka-messaging`](krizaka-messaging) | `com.krizaka:krizaka-messaging` | **Idempotent consumption** (atomic claim + release on failure) and the **transactional outbox relay** for RabbitMQ |
+| [`krizaka-messaging`](krizaka-messaging) | `com.krizaka:krizaka-messaging` | **Events through the outbox** with their envelope in AMQP headers, consumer queues with **retry then DLQ**, **idempotent consumption** and the **transactional outbox relay** for RabbitMQ |
 | [`krizaka-web`](krizaka-web) | `com.krizaka:krizaka-web` | **RFC 9457 Problem Details** with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
 
 Requires Java 21 and Spring Boot 4.0.
@@ -115,69 +115,44 @@ security stack. Any process holding the secret can mint `SERVICE` — keep the s
 
 ## krizaka-messaging
 
-### Process each message once — and a failed one again
+### Publish an event in one transactional line
 
 ```yaml
 krizaka:
   messaging:
-    dedup:
-      store: jdbc        # or `memory` for a service without a database
+    producer: krizaka-users
 ```
 
 ```java
-@RabbitListener(queues = "billing.settlements")
-void onSettlement(Message message) {
-  String id = message.getMessageProperties().getMessageId();
-  if (!dedup.claim("billing.settlement", id)) {
-    return;                                   // already processed
-  }
-  try {
-    settle(message);
-  } catch (RuntimeException e) {
-    dedup.release("billing.settlement", id);  // the redelivery is processed, not dropped
-    throw e;
-  }
+@Transactional
+public User register(NewUser input) {
+  User user = users.save(input);
+  events.publish("evt.user.registered", 1, new UserRegistered(user.id(), user.email()));
+  return user;
 }
 ```
 
-Claims are only useful while a redelivery is possible: call `dedup.purgeClaimedBefore(Instant.now().minus(Duration.ofDays(7)))`
-from your housekeeping job to keep the table small.
+The event is a row of your outbox, committed with the state change; the relay publishes it afterwards with a
+`messageId` chosen at write time and its envelope (`kz-type`, `kz-version`, `kz-producer`, `kz-correlation-id`,
+`kz-occurred-at`) in AMQP headers — the body stays the bare event.
 
-`claim` is one `INSERT` arbitrated by the primary key — never a read followed by a write, which two overlapping
-deliveries both pass. The store is **declared**, never inferred: no property, no bean, and `store=jdbc` without a
-database fails at startup instead of quietly falling back to memory. The JDBC table:
-
-```sql
-CREATE TABLE processed_messages (
-    consumer     VARCHAR(255) NOT NULL,
-    message_id   VARCHAR(255) NOT NULL,
-    processed_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    PRIMARY KEY (consumer, message_id)
-);
-```
-
-### Publish what you committed, exactly once per success
-
-Write your events to an outbox table in the same transaction as the state change, and implement `OutboxStore` over it:
+### Consume a queue declared in one line
 
 ```java
-@Component
-class WalletOutbox implements OutboxStore {
-  public List<OutboxMessage> lockPendingBatch(int batchSize) {
-    return jdbc.query("""
-        SELECT id, exchange, routing_key, message_id, payload::text, attempts FROM wallet_outbox
-        WHERE published_at IS NULL AND next_attempt_at <= now()
-        ORDER BY created_at LIMIT ? FOR UPDATE SKIP LOCKED""", this::row, batchSize);
-  }
-  // markPublished, recordFailure (your back-off), purgePublishedBefore
+@Bean
+Declarables userEvents(MessagingExchanges exchanges) {
+  return KrizakaQueues.consumer(exchanges, "krizaka.notifications.user-events", "evt.user.registered");
 }
 ```
 
-Every `OutboxStore` bean gets a relay: one transaction per batch, each row published as a persistent JSON message with
-its `messageId`, marked on success, backed off on failure, purged after the retention window. It runs on its own thread
-(no `@EnableScheduling` needed) and is tuned with `krizaka.messaging.outbox.{enabled, poll-interval, batch-size,
-purge-interval, retention}`. **`lockPendingBatch` must claim its rows** (`FOR UPDATE SKIP LOCKED` on PostgreSQL), or two
-instances publish the same row.
+A quorum queue and its `<queue>.dlq`; the kit's listener container retries a failing listener with back-off
+(`krizaka.messaging.retry.*`, 5 attempts from 500 ms by default) and then dead-letters it with its headers. Pair it
+with `MessageDedup` (`krizaka.messaging.dedup.store=jdbc|memory`): `claim` is one `INSERT`, `release` gives the claim
+back when the handler fails, so a redelivery is processed once and a failure is never silently dropped.
+
+Every `OutboxStore` bean gets a relay; **`lockPendingBatch` must claim its rows** (`FOR UPDATE SKIP LOCKED`). The
+recommended outbox schema, the event versioning rules and the naming conventions:
+[krizaka-messaging/README.md](krizaka-messaging/README.md).
 
 ## krizaka-web
 

@@ -12,7 +12,7 @@
 
     <artifactId>krizaka-messaging</artifactId>
     <name>Krizaka Messaging</name>
-    <description>At-least-once messaging done right for Spring Boot and RabbitMQ: idempotent consumption (an atomic claim, released when the handler fails) and a transactional outbox relay that claims what it publishes.</description>
+    <description>At-least-once messaging done right for Spring Boot and RabbitMQ: events published through a transactional outbox with their envelope in AMQP headers, a relay that claims what it publishes, consumer queues with retry and a dead-letter queue by convention, and idempotent consumption (an atomic claim, released when the handler fails).</description>
 
     <dependencies>
         <dependency>
@@ -39,6 +39,26 @@
             <artifactId>spring-rabbit</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Optional: Spring Boot's listener-container configurer, so the kit's container factory
+             keeps every spring.rabbitmq.listener.simple.* setting the application declares. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-amqp</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Optional: events and consumed messages are JSON written by the application's own
+             Jackson 3 JsonMapper — the kit never brings a mapper of its own. -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -50,5 +70,57 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Integration tests: a real RabbitMQ and PostgreSQL (one each per run). -->
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-test-support</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jackson</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- The configuration processor runs explicitly: JDK 23+ no longer discovers
+                 annotation processors on the classpath, and the metadata is part of the contract. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>${spring-boot.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

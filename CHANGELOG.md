@@ -22,6 +22,29 @@ Every Krizaka JVM artifact is released at the same version.
   - Declared CORS (`krizaka.web.cors.allowed-origins`, exact origins only) for Spring Security and Spring MVC alike.
   - `KrizakaWebProperties` (`krizaka.web.*`), `KrizakaWebAutoConfiguration` (also applied to `@WebMvcTest` slices) and
     `KrizakaWebEnvironmentPostProcessor` (`spring.mvc.problemdetails.enabled=true`, lowest priority).
+- `krizaka-messaging` — events, consumer topology, retry and dead letters:
+  - `EventPublisher` / `OutboxEventPublisher`: one transactional call writes the event to the context's outbox, body =
+    the bare event serialized by the application's Jackson 3 `JsonMapper`, `messageId` chosen at write time, envelope in
+    AMQP headers (`EventHeaders`: `kz-type`, `kz-version`, `kz-producer`, `kz-correlation-id`, `kz-occurred-at`).
+    `EventPublisherAutoConfiguration` builds it lazily and fails at startup, with the reason, when it is injected
+    without `krizaka.messaging.producer` or without exactly one `OutboxStore`.
+  - `NewOutboxMessage` and `OutboxStore.append(NewOutboxMessage)`; `OutboxMessage` carries `headers`; the relay
+    publishes them with the `messageId`, `application/json` and a timestamp. The recommended outbox table gains
+    `headers jsonb`.
+  - `KrizakaQueues.consumer(exchanges, queue, routingKeys...)`: quorum queue + `<queue>.dlq`, bound by convention.
+  - `KrizakaRabbitAutoConfiguration`: `JacksonJsonMessageConverter` over the application's `JsonMapper`
+    (`alwaysConvertToInferredType`), and a `rabbitListenerContainerFactory` keeping Spring Boot's listener settings with
+    a stateless retry (`ConsumerRetryProperties`, `krizaka.messaging.retry.*`: 5 / 500 ms / ×2 / 10 s) and
+    `DeadLetterQueueRecoverer` (republish to `<queue>.dlq` with the original headers); `defaultRequeueRejected=false`.
+    Each bean yields to the application's own; the factory also yields to an application that declared Spring Boot's
+    retry; `krizaka.messaging.consumer.enabled=false` turns it all off.
+  - `MessagingRoundTripIT` on real PostgreSQL and RabbitMQ (`krizaka-test-support`).
+
+### Changed
+
+- `OutboxStore.append` is a **default** method that throws `UnsupportedOperationException`: existing stores keep
+  compiling and relaying; implement it to publish through `EventPublisher`. The six-argument `OutboxMessage`
+  constructor is kept (no headers).
 
 ## [0.1.0]
 

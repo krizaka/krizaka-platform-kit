@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "krizaka.messaging.consumer.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether krizaka-messaging contributes the JSON message converter and the listener container factory (retry with back-off, then <queue>.dlq).",
+      "defaultValue": true
+    }
+  ]
+}

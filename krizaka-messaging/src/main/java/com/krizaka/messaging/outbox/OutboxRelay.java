@@ -2,6 +2,7 @@ package com.krizaka.messaging.outbox;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
@@ -16,8 +17,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * Publishes an {@link OutboxStore}'s pending rows to RabbitMQ, each exactly once per success.
  *
  * <p>One batch runs in one transaction: the rows are claimed, each is published as a persistent
- * JSON message carrying its {@code messageId}, then marked published — or, when the publish fails,
- * recorded as a failure so the store backs it off. A failure never stops the rest of the batch.
+ * JSON message carrying its {@code messageId}, its headers and a timestamp, then marked published —
+ * or, when the publish fails, recorded as a failure so the store backs it off. A failure never
+ * stops the rest of the batch.
  *
  * <p>Delivery is at-least-once: a crash between the publish and the commit republishes the row on
  * the next run, with the same {@code messageId}, which consumers deduplicate on ({@link
@@ -94,7 +96,7 @@ public final class OutboxRelay {
     int published = 0;
     for (OutboxMessage message : batch) {
       try {
-        amqp.send(message.exchange(), message.routingKey(), toAmqp(message));
+        amqp.send(message.exchange(), message.routingKey(), toAmqp(message, clock));
         store.markPublished(message.id());
         published++;
       } catch (RuntimeException e) {
@@ -111,7 +113,7 @@ public final class OutboxRelay {
     return published;
   }
 
-  private static Message toAmqp(OutboxMessage message) {
+  static Message toAmqp(OutboxMessage message, Clock clock) {
     MessageProperties properties = new MessageProperties();
     properties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
     properties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
@@ -119,6 +121,9 @@ public final class OutboxRelay {
     if (message.messageId() != null) {
       properties.setMessageId(message.messageId());
     }
+    message.headers().forEach(properties::setHeader);
+    // The publish time; when the event happened travels in its own header (kz-occurred-at).
+    properties.setTimestamp(Date.from(clock.instant()));
     return new Message(message.body(), properties);
   }
 

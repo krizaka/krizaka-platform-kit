@@ -12,6 +12,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -54,6 +56,29 @@ class OutboxRelayTest {
     assertThat(new String(sent.getValue().getBody(), StandardCharsets.UTF_8))
         .isEqualTo("{\"credits\":5}");
     assertThat(store.published).containsExactly(row.id());
+  }
+
+  @Test
+  void theRowsHeadersTravelAsAmqpHeadersWithAPublishTimestamp() {
+    store.pending.add(
+        new OutboxMessage(
+            UUID.randomUUID(),
+            "platform.events",
+            "evt.wallet.debited",
+            "m-2",
+            "{}".getBytes(StandardCharsets.UTF_8),
+            0,
+            Map.of("kz-type", "evt.wallet.debited", "kz-version", "1")));
+
+    relay.relayPendingBatch();
+
+    ArgumentCaptor<Message> sent = ArgumentCaptor.forClass(Message.class);
+    verify(amqp).send(any(String.class), any(String.class), sent.capture());
+    MessageProperties properties = sent.getValue().getMessageProperties();
+    assertThat(properties.getHeaders())
+        .containsEntry("kz-type", "evt.wallet.debited")
+        .containsEntry("kz-version", "1");
+    assertThat(properties.getTimestamp()).isEqualTo(Date.from(NOW));
   }
 
   @Test
