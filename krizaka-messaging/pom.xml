@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.krizaka</groupId>
             <artifactId>krizaka-test-support</artifactId>
-            <version>${project.version}</version>
+            <version>${krizaka-build.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

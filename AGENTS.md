@@ -1,7 +1,8 @@
 # krizaka-platform-kit — Scope (agent-neutral)
 
 > Cross-cutting building blocks for Spring Boot services, published on Maven Central as `com.krizaka:krizaka-security`,
-> `com.krizaka:krizaka-messaging` and `com.krizaka:krizaka-web`. Orazaka consumes them; so can any application. When
+> `com.krizaka:krizaka-messaging`, `com.krizaka:krizaka-web`, `com.krizaka:krizaka-observability` and the four
+> `krizaka-spring-boot-starter-*`. Orazaka consumes them; so can any application. When
 > this repository is cloned inside the Orazaka workspace (`krizaka/krizaka-platform-kit`), the workspace contract
 > ([`krizaka/orazaka/AGENTS.md`](https://github.com/krizaka/orazaka/blob/main/AGENTS.md)) applies as well.
 
@@ -19,6 +20,12 @@ ADR-073, which created this kit).
   prerequisite fails at startup with the reason.
 - **Optional dependencies stay optional.** Spring Security, Spring MVC, JDBC and RabbitMQ are `optional`; every
   auto-configuration is guarded so that an application without them starts. A test with `FilteredClassLoader` proves it for each one.
+- **A starter is a POM; the code is in the module.** `starters/krizaka-spring-boot-starter-*` hold dependencies and
+  one integration test that starts an application on that starter alone — never a class. Behaviour goes in the module
+  (`krizaka-web`, `krizaka-security`, …), which stays usable without its starter.
+- **Releases are release-please's.** Pull request titles are Conventional Commits; nobody edits a version or the
+  generated part of the CHANGELOG by hand. The kit has its own SemVer version; its `krizaka-parent` and
+  `krizaka-build.version` move together, to a `krizaka-build` release, before a kit release.
 - **Public API is documented.** Every public type and method has javadoc; `./mvnw verify -Prelease -Dgpg.skip` lints it.
 
 ## Definition of done

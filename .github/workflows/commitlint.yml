@@ -1,0 +1,19 @@
+# The squash merge keeps the pull request title as the commit message, and release-please reads
+# those messages: the title must be a Conventional Commit (feat:, fix:, feat!:, chore:, …).
+name: commitlint
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  pr-title:
+    name: Conventional Commits title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

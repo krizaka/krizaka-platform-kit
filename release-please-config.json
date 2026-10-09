@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "maven",
+  "include-component-in-tag": false,
+  "bump-minor-pre-major": true,
+  "bootstrap-sha": "36adcba8ddbf6b3043f2a0e45d0f07dd1189530f",
+  "packages": {
+    ".": {
+      "extra-files": [
+        "krizaka-security/pom.xml",
+        "krizaka-messaging/pom.xml",
+        "krizaka-web/pom.xml",
+        "krizaka-observability/pom.xml",
+        "starters/pom.xml",
+        "starters/krizaka-spring-boot-starter-web/pom.xml",
+        "starters/krizaka-spring-boot-starter-security/pom.xml",
+        "starters/krizaka-spring-boot-starter-rabbitmq/pom.xml",
+        "starters/krizaka-spring-boot-starter-observability/pom.xml",
+        "examples/krizaka-starters-example/pom.xml"
+      ]
+    }
+  }
+}

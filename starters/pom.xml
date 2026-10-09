@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- The starters: one dependency per capability. A starter is a POM — an empty jar whose
+         dependencies are the kit module and the Spring Boot starters that capability needs. The
+         code lives in the module (krizaka-web, krizaka-security, …), never here: the modules stay
+         usable alone, and a Spring Boot upgrade changes these lists, not a product's POM.
+
+         This parent exists for one reason: Maven Central requires a sources and a javadoc jar next
+         to every jar, and a module without sources produces neither. The release profile below
+         attaches both, each holding the starter's pom.xml — the starter's whole content. -->
+    <parent>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-platform-kit</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>krizaka-spring-boot-starters</artifactId>
+    <packaging>pom</packaging>
+    <name>Krizaka Spring Boot Starters</name>
+    <description>Parent of the Krizaka Spring Boot starters: one dependency per capability (web, security, rabbitmq, observability), each an aggregator of a kit module and the Spring Boot starters it needs.</description>
+
+    <modules>
+        <module>krizaka-spring-boot-starter-web</module>
+        <module>krizaka-spring-boot-starter-security</module>
+        <module>krizaka-spring-boot-starter-rabbitmq</module>
+        <module>krizaka-spring-boot-starter-observability</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>starter-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>sources</classifier>
+                                    <classesDirectory>${project.basedir}</classesDirectory>
+                                    <includes>
+                                        <include>pom.xml</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>starter-javadoc</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <classifier>javadoc</classifier>
+                                    <classesDirectory>${project.basedir}</classesDirectory>
+                                    <includes>
+                                        <include>pom.xml</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

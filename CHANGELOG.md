@@ -1,13 +1,31 @@
 # Changelog
 
-All notable changes to this repository are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/).
-Every Krizaka JVM artifact is released at the same version.
+Versions follow [Semantic Versioning](https://semver.org/) per repository; the compatible set of every Krizaka JVM
+artifact is the one `krizaka-bom` carries. Releases are written by
+[release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
+hand-written history is under *Before release-please*.
 
-## [Unreleased]
+## Before release-please
 
-### Added
+Written by hand, in the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
+### Unreleased when release-please took over (shipped in the first release below it)
+
+#### Added
+
+- `krizaka-observability` — `KrizakaObservabilityProperties` (`krizaka.observability.product|service|version`,
+  required: a service that does not name itself fails at startup with every missing key),
+  `KrizakaObservabilityAutoConfiguration` (`product`, `service`, `version` as common tags of every meter, where
+  Micrometer is present) and `KrizakaObservabilityEnvironmentPostProcessor` (lowest priority:
+  `logging.structured.format.console=ecs`, `management.endpoints.web.exposure.include=health,info,prometheus`,
+  `management.tracing.sampling.probability=0.1`).
+- Starters — one dependency per capability, each an empty jar (a POM) with an integration test that starts an
+  application on it alone: `krizaka-spring-boot-starter-web`, `-security`, `-rabbitmq`, `-observability`
+  (parent `krizaka-spring-boot-starters`).
+- `examples/krizaka-starters-example`: a service on the four starters with a 12-line `application.yml`, tested on real
+  PostgreSQL and RabbitMQ; never published.
+- Releases by release-please (`release-please-config.json`, `.github/workflows/release-please.yml`) and Conventional
+  Commits pull request titles checked by `.github/workflows/commitlint.yml`.
 - `krizaka-web` — the HTTP baseline of a Spring MVC service:
   - `ProblemDetailsAdvice`: RFC 9457 Problem Details for every error — `DomainException` (abstract; `NotFoundException`,
     `ConflictException`, `ForbiddenException`, `ValidationException`) → its 4xx with `type`, `code` and `requestId`;
@@ -40,15 +58,17 @@ Every Krizaka JVM artifact is released at the same version.
     retry; `krizaka.messaging.consumer.enabled=false` turns it all off.
   - `MessagingRoundTripIT` on real PostgreSQL and RabbitMQ (`krizaka-test-support`).
 
-### Changed
+#### Changed
 
+- The kit has its own version (SemVer per repository); the `krizaka-parent` it inherits and `krizaka-test-support`
+  (`krizaka-build.version`) follow a `krizaka-build` release explicitly.
 - `OutboxStore.append` is a **default** method that throws `UnsupportedOperationException`: existing stores keep
   compiling and relaying; implement it to publish through `EventPublisher`. The six-argument `OutboxMessage`
   constructor is kept (no headers).
 
-## [0.1.0]
+### Version 0.1.0
 
-### Added
+#### Added
 
 - `krizaka-security`
   - `SessionJwtProperties` (`krizaka.security.jwt.secret`, 32-character minimum) and `SessionJwtAutoConfiguration`:
