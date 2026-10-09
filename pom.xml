@@ -17,6 +17,11 @@
     </parent>
 
     <artifactId>krizaka-platform-kit</artifactId>
+    <!-- The kit's own version, released by release-please (SemVer per repository). It is declared
+         here, not inherited, so that a release moves the kit and never the krizaka-parent it is
+         built on: that one moves deliberately, with krizaka-build.version below (the same
+         krizaka-build release), and must be a release on Maven Central before the kit is tagged. -->
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Krizaka Platform Kit</name>
     <description>Cross-cutting building blocks for Spring Boot services: stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption, a transactional outbox relay and the HTTP baseline (Problem Details, request correlation, Jackson defaults, cursor pagination, declared CORS).</description>
@@ -36,10 +41,19 @@
         <url>https://github.com/krizaka/krizaka-platform-kit/issues</url>
     </issueManagement>
 
+    <properties>
+        <!-- The krizaka-build release the kit is built on: krizaka-test-support, at the version of
+             the krizaka-parent above. -->
+        <krizaka-build.version>0.1.0-SNAPSHOT</krizaka-build.version>
+    </properties>
+
     <modules>
         <module>krizaka-security</module>
         <module>krizaka-messaging</module>
         <module>krizaka-web</module>
+        <module>krizaka-observability</module>
+        <module>starters</module>
+        <module>examples/krizaka-starters-example</module>
     </modules>
 
     <dependencyManagement>
@@ -53,4 +67,21 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- The example is built and tested with the kit, never published. -->
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <configuration>
+                        <excludeArtifacts>
+                            <excludeArtifact>krizaka-starters-example</excludeArtifact>
+                        </excludeArtifacts>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

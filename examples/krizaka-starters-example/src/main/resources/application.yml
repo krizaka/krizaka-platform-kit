@@ -1,0 +1,12 @@
+spring:
+  application.name: krizaka-starters-example
+  datasource.url: ${DATABASE_URL}
+  rabbitmq.addresses: ${RABBITMQ_URL}
+krizaka:
+  observability: { product: krizaka, service: example, version: "@project.version@" }
+  security.jwt.secret: ${KRIZAKA_JWT_SECRET}
+  messaging:
+    producer: krizaka-starters-example
+    exchanges: { events: example.events, dead-letter: example.dlx }
+    dedup.store: memory
+  web.cors.allowed-origins: [ "https://example.com" ]

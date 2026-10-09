@@ -34,8 +34,40 @@ tested.
 | [`krizaka-security`](krizaka-security) | `com.krizaka:krizaka-security` | HS256 session-token verification, `roles`-claim authorities, the **security baseline**, the `SERVICE` token for `/internal/v1/**` |
 | [`krizaka-messaging`](krizaka-messaging) | `com.krizaka:krizaka-messaging` | **Events through the outbox** with their envelope in AMQP headers, consumer queues with **retry then DLQ**, **idempotent consumption** and the **transactional outbox relay** for RabbitMQ |
 | [`krizaka-web`](krizaka-web) | `com.krizaka:krizaka-web` | **RFC 9457 Problem Details** with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
+| [`krizaka-observability`](krizaka-observability) | `com.krizaka:krizaka-observability` | **Required service names** (product, service, version) as common metric tags, ECS JSON logs, health/info/prometheus exposed, 10 % trace sampling — defaults at the lowest priority |
 
 Requires Java 21 and Spring Boot 4.0.
+
+## Starters — one dependency per capability
+
+A starter is a POM: the kit module and the Spring Boot starters the capability needs, nothing else. A product declares
+capabilities, never the Spring list behind them; a Spring Boot upgrade changes the starters, not the product's POM.
+
+| Starter | Brings |
+|:---|:---|
+| `com.krizaka:krizaka-spring-boot-starter-web` | `krizaka-web` + `spring-boot-starter-webmvc` + `-validation` + `-actuator` |
+| `com.krizaka:krizaka-spring-boot-starter-security` | `krizaka-security` + `spring-boot-starter-security` + `-oauth2-resource-server` |
+| `com.krizaka:krizaka-spring-boot-starter-rabbitmq` | `krizaka-messaging` + `spring-boot-starter-amqp` + `-jdbc` + `-jackson` (add your JDBC driver) |
+| `com.krizaka:krizaka-spring-boot-starter-observability` | `krizaka-observability` + `spring-boot-starter-actuator` + OpenTelemetry tracing (`spring-boot-micrometer-tracing-opentelemetry`, `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`) + `micrometer-registry-prometheus` |
+
+The whole configuration of a service on the four starters — everything else is a kit default you can override
+([`examples/krizaka-starters-example`](examples/krizaka-starters-example), started on real PostgreSQL and RabbitMQ by
+its integration test):
+
+```yaml
+spring:
+  application.name: orazaka-conversation-service
+  datasource.url: ${DATABASE_URL}
+  rabbitmq.addresses: ${RABBITMQ_URL}
+krizaka:
+  observability: { product: orazaka, service: conversation, version: "@project.version@" }
+  security.jwt.secret: ${KRIZAKA_JWT_SECRET}
+  messaging:
+    exchanges: { events: orazaka.events, dead-letter: orazaka.dlx }
+    dedup.store: jdbc
+    outbox.enabled: true
+  web.cors.allowed-origins: [ "https://app.orazaka.com" ]
+```
 
 ## Install
 
@@ -55,16 +87,14 @@ Requires Java 21 and Spring Boot 4.0.
 <dependencies>
     <dependency>
         <groupId>com.krizaka</groupId>
-        <artifactId>krizaka-security</artifactId>
+        <artifactId>krizaka-spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
         <groupId>com.krizaka</groupId>
-        <artifactId>krizaka-messaging</artifactId>
+        <artifactId>krizaka-spring-boot-starter-observability</artifactId>
     </dependency>
-    <dependency>
-        <groupId>com.krizaka</groupId>
-        <artifactId>krizaka-web</artifactId>
-    </dependency>
+    <!-- … or a module alone (krizaka-security, krizaka-messaging, krizaka-web, krizaka-observability)
+         in an application that brings its own Spring stack: a batch without web, a test without Rabbit. -->
 </dependencies>
 ```
 
@@ -180,6 +210,19 @@ sent back and put in the MDC; Jackson writes ISO dates and omits nulls; `Cursor`
 opaque token; CORS opens only the origins listed in `krizaka.web.cors.allowed-origins`. The full contract:
 [krizaka-web/README.md](krizaka-web/README.md).
 
+## krizaka-observability
+
+```yaml
+krizaka:
+  observability: { product: acme, service: orders, version: "@project.version@" }
+```
+
+The three names are required — a service that cannot say who it is does not start, and the error lists what is
+missing. Every meter is tagged `product`, `service`, `version`. At the lowest priority, so `application.yml` still wins:
+`logging.structured.format.console=ecs`, `management.endpoints.web.exposure.include=health,info,prometheus`,
+`management.tracing.sampling.probability=0.1`. The OTLP exporter sends spans once
+`management.opentelemetry.tracing.export.otlp.endpoint` (Spring Boot 4) is set.
+
 ## Build
 
 ```bash
@@ -188,6 +231,15 @@ opaque token; CORS opens only the origins listed in `krizaka.web.cors.allowed-or
 ```
 
 It inherits [`krizaka-parent`](https://github.com/krizaka/krizaka-build): build it first, or let CI do it.
+
+## Releasing
+
+Pull request titles are [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `feat!:` —
+checked by `commitlint`; the squash merge keeps the title). [release-please](https://github.com/googleapis/release-please)
+keeps a release pull request open on `main`; merging it sets the version in every `pom.xml`, writes the CHANGELOG, tags
+`v<version>` and dispatches CI on that tag, which signs and uploads to the Central Portal (organisation pipeline,
+publication confirmed by hand). Before merging it, the kit's `krizaka-parent` and `krizaka-build.version` must name a
+`krizaka-build` release that is on Maven Central — the release refuses any `-SNAPSHOT` parent.
 
 ## Contributing
 
