@@ -7,8 +7,9 @@
 
 **The cross-cutting code every Spring Boot service writes — written once, and right.**
 
-Stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption and a
-transactional outbox relay. Spring Boot auto-configurations: add the dependency, declare the properties.
+Stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption, a
+transactional outbox relay and one HTTP error format. Spring Boot auto-configurations: add the dependency, declare the
+properties.
 
 [![CI](https://github.com/krizaka/krizaka-platform-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-platform-kit/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/com.krizaka/krizaka-security?color=3b82f6&label=maven%20central)](https://central.sonatype.com/namespace/com.krizaka)
@@ -32,6 +33,7 @@ tested.
 |:---|:---|:---|
 | [`krizaka-security`](krizaka-security) | `com.krizaka:krizaka-security` | HS256 session-token verification, `roles`-claim authorities, the **security baseline**, the `SERVICE` token for `/internal/v1/**` |
 | [`krizaka-messaging`](krizaka-messaging) | `com.krizaka:krizaka-messaging` | **Idempotent consumption** (atomic claim + release on failure) and the **transactional outbox relay** for RabbitMQ |
+| [`krizaka-web`](krizaka-web) | `com.krizaka:krizaka-web` | **RFC 9457 Problem Details** with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
 
 Requires Java 21 and Spring Boot 4.0.
 
@@ -58,6 +60,10 @@ Requires Java 21 and Spring Boot 4.0.
     <dependency>
         <groupId>com.krizaka</groupId>
         <artifactId>krizaka-messaging</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-web</artifactId>
     </dependency>
 </dependencies>
 ```
@@ -172,6 +178,32 @@ its `messageId`, marked on success, backed off on failure, purged after the rete
 (no `@EnableScheduling` needed) and is tuned with `krizaka.messaging.outbox.{enabled, poll-interval, batch-size,
 purge-interval, retention}`. **`lockPendingBatch` must claim its rows** (`FOR UPDATE SKIP LOCKED` on PostgreSQL), or two
 instances publish the same row.
+
+## krizaka-web
+
+### One error format for every service
+
+```java
+throw new ConflictException("auction-closed", "The auction closed at 18:00.");
+```
+
+```json
+{
+  "type": "https://krizaka.com/problems/auction-closed",
+  "title": "auction closed",
+  "status": 409,
+  "detail": "The auction closed at 18:00.",
+  "code": "auction-closed",
+  "requestId": "0b6c3f1e-6a52-4c4e-9a43-61f0f1f2a1d7"
+}
+```
+
+A `DomainException` (`NotFoundException`, `ConflictException`, `ForbiddenException`, `ValidationException`, or your
+own 4xx) is the only exception that leaves as a 4xx; bean validation is a `422` with an `errors` array; anything
+unexpected is a `500` whose message is logged with the `requestId`, never sent. `X-Request-Id` is accepted or created,
+sent back and put in the MDC; Jackson writes ISO dates and omits nulls; `Cursor` / `CursorPage` page by key with an
+opaque token; CORS opens only the origins listed in `krizaka.web.cors.allowed-origins`. The full contract:
+[krizaka-web/README.md](krizaka-web/README.md).
 
 ## Build
 

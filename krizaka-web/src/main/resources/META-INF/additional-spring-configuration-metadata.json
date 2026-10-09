@@ -1,0 +1,15 @@
+{
+  "properties": [
+    {
+      "name": "krizaka.web.problems.base-type",
+      "type": "java.net.URI",
+      "description": "Prefix every Problem Details 'type' is resolved against (<base-type><code>). Absolute, ending with '/'.",
+      "defaultValue": "https://krizaka.com/problems/"
+    },
+    {
+      "name": "krizaka.web.cors.allowed-origins",
+      "type": "java.util.List<java.lang.String>",
+      "description": "Exact browser origins (scheme, host, port) allowed to call the service. Empty, the default, allows none and registers no CORS policy. '*' is refused."
+    }
+  ]
+}
