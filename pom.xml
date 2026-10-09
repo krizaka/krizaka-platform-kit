@@ -13,7 +13,7 @@
         <groupId>com.krizaka</groupId>
         <artifactId>krizaka-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
-        <relativePath/>
+        <relativePath>../krizaka-build/krizaka-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>krizaka-platform-kit</artifactId>
