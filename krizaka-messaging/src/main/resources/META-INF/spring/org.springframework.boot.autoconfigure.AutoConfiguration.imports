@@ -1,2 +1,3 @@
 com.krizaka.messaging.dedup.MessageDedupAutoConfiguration
 com.krizaka.messaging.outbox.OutboxAutoConfiguration
+com.krizaka.messaging.topology.MessagingExchangesAutoConfiguration
