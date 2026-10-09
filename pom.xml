@@ -19,7 +19,7 @@
     <artifactId>krizaka-platform-kit</artifactId>
     <packaging>pom</packaging>
     <name>Krizaka Platform Kit</name>
-    <description>Cross-cutting building blocks for Spring Boot services: stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption and a transactional outbox relay.</description>
+    <description>Cross-cutting building blocks for Spring Boot services: stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption, a transactional outbox relay and the HTTP baseline (Problem Details, request correlation, Jackson defaults, cursor pagination, declared CORS).</description>
     <url>https://github.com/krizaka/krizaka-platform-kit</url>
 
     <scm child.scm.connection.inherit.append.path="false"
@@ -39,6 +39,7 @@
     <modules>
         <module>krizaka-security</module>
         <module>krizaka-messaging</module>
+        <module>krizaka-web</module>
     </modules>
 
     <dependencyManagement>
