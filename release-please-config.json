@@ -3,6 +3,7 @@
   "release-type": "maven",
   "include-component-in-tag": false,
   "bump-minor-pre-major": true,
+  "skip-snapshot": true,
   "bootstrap-sha": "36adcba8ddbf6b3043f2a0e45d0f07dd1189530f",
   "packages": {
     ".": {
