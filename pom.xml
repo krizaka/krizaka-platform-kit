@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         child.project.url.inherit.append.path="false">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- krizaka-platform-kit: the cross-cutting code every Krizaka Spring Boot service would
+         otherwise write itself — and, measured in Orazaka, did write five to seven times, with
+         three live bugs among the copies (ADR-058). Each module is a Spring Boot auto-configuration:
+         add the dependency, set the declared properties, and the service carries the invariant. -->
+    <parent>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>krizaka-platform-kit</artifactId>
+    <packaging>pom</packaging>
+    <name>Krizaka Platform Kit</name>
+    <description>Cross-cutting building blocks for Spring Boot services: stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption and a transactional outbox relay.</description>
+    <url>https://github.com/krizaka/krizaka-platform-kit</url>
+
+    <scm child.scm.connection.inherit.append.path="false"
+         child.scm.developerConnection.inherit.append.path="false"
+         child.scm.url.inherit.append.path="false">
+        <url>https://github.com/krizaka/krizaka-platform-kit</url>
+        <connection>scm:git:https://github.com/krizaka/krizaka-platform-kit.git</connection>
+        <developerConnection>scm:git:git@github.com:krizaka/krizaka-platform-kit.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/krizaka/krizaka-platform-kit/issues</url>
+    </issueManagement>
+
+    <modules>
+        <module>krizaka-security</module>
+        <module>krizaka-messaging</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

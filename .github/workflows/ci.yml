@@ -1,0 +1,25 @@
+# Verifies the platform kit (unit tests, auto-configuration tests, javadoc, sources) on every change (with the release profile, unsigned), and on a
+# v* tag signs them and uploads them to Maven Central. The pipeline is the organisation's:
+# krizaka/.github/.github/workflows/maven.yml.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  maven:
+    uses: krizaka/.github/.github/workflows/maven.yml@main
+    with:
+      upstreams: "krizaka-build"
+    secrets: inherit
