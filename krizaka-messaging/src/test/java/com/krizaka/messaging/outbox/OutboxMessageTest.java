@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -43,5 +45,27 @@ class OutboxMessageTest {
     String text =
         new OutboxMessage(ID, "x", "k", "m", "{\"email\":\"a@b.c\"}".getBytes(), 0).toString();
     assertThat(text).doesNotContain("a@b.c").contains("bytes");
+  }
+
+  @Test
+  void aRowWrittenBeforeTheEnvelopeHasNoHeaders() {
+    assertThat(new OutboxMessage(ID, "x", "k", "m", new byte[0], 0).headers()).isEmpty();
+    assertThat(new OutboxMessage(ID, "x", "k", "m", new byte[0], 0, null).headers()).isEmpty();
+  }
+
+  @Test
+  void theHeadersCannotBeChangedFromOutside() {
+    Map<String, String> headers = new HashMap<>(Map.of("kz-type", "evt.a.b"));
+    OutboxMessage message = new OutboxMessage(ID, "x", "k", "m", new byte[0], 0, headers);
+
+    headers.put("kz-type", "evt.forged");
+
+    assertThat(message.headers()).containsExactly(Map.entry("kz-type", "evt.a.b"));
+  }
+
+  @Test
+  void equalityComparesTheHeaders() {
+    assertThat(new OutboxMessage(ID, "x", "k", "m", new byte[0], 0, Map.of("a", "1")))
+        .isNotEqualTo(new OutboxMessage(ID, "x", "k", "m", new byte[0], 0, Map.of("a", "2")));
   }
 }

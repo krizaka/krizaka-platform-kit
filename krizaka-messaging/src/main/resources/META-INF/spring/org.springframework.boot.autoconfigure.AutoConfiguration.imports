@@ -1,3 +1,5 @@
 com.krizaka.messaging.dedup.MessageDedupAutoConfiguration
 com.krizaka.messaging.outbox.OutboxAutoConfiguration
 com.krizaka.messaging.topology.MessagingExchangesAutoConfiguration
+com.krizaka.messaging.event.EventPublisherAutoConfiguration
+com.krizaka.messaging.consume.KrizakaRabbitAutoConfiguration
