@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.1.0...v0.2.0) (2026-10-10)
+
+
+### Features
+
+* krizaka-observability, the four starters and releases by release-please ([#5](https://github.com/krizaka/krizaka-platform-kit/issues/5)) ([3cf1788](https://github.com/krizaka/krizaka-platform-kit/commit/3cf1788ff03b274413dd5479cee4054f98b503cb))
+* **messaging:** events through the outbox with an AMQP-header envelope, consumer queues with retry then DLQ, Jackson 3 JSON ([#4](https://github.com/krizaka/krizaka-platform-kit/issues/4)) ([ceeed95](https://github.com/krizaka/krizaka-platform-kit/commit/ceeed95cf7ca2fb9f75ed2cb56c96d7a16c9a777))
+* **web:** krizaka-web — Problem Details, request correlation, Jackson 3 defaults, cursor pagination, declared CORS ([#3](https://github.com/krizaka/krizaka-platform-kit/issues/3)) ([78f17f6](https://github.com/krizaka/krizaka-platform-kit/commit/78f17f68c540ae1c3b6451d1ba1eec50ea7917dd))
+
+
+### Bug Fixes
+
+* **release:** release-please skips the -SNAPSHOT pull request ([#7](https://github.com/krizaka/krizaka-platform-kit/issues/7)) ([528171b](https://github.com/krizaka/krizaka-platform-kit/commit/528171b4405257b56b2101eeb9e170f47603cc73))
+
+## Changelog
+
 Versions follow [Semantic Versioning](https://semver.org/) per repository; the compatible set of every Krizaka JVM
 artifact is the one `krizaka-bom` carries. Releases are written by
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
