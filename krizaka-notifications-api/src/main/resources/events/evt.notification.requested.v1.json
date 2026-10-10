@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://krizaka.com/events/evt.notification.requested.v1.json",
+  "title": "evt.notification.requested v1",
+  "description": "A service asks for a notification on one channel. Published by any service (through its outbox) on the platform's events exchange and consumed by krizaka-notifications, which renders the template in the locale and delivers it. The body is the bare request; the envelope travels in the kz-* AMQP headers.",
+  "type": "object",
+  "required": ["channel", "recipient", "template"],
+  "properties": {
+    "channel": { "enum": ["EMAIL", "SMS", "WEBHOOK"] },
+    "recipient": {
+      "type": "string",
+      "minLength": 1,
+      "description": "An e-mail address, an E.164 phone number or a webhook URL, by channel."
+    },
+    "template": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "locale": {
+      "type": ["string", "null"],
+      "description": "A BCP 47 language tag; only the language is used, en when absent."
+    },
+    "variables": {
+      "type": ["object", "null"],
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}

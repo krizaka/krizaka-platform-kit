@@ -6,6 +6,14 @@ Every Krizaka JVM artifact is released at the same version.
 
 ## [Unreleased]
 
+### Added
+
+- Event contracts: `krizaka-notifications-api` publishes the JSON Schema (draft 2020-12) of
+  `evt.notification.requested` (`events/evt.notification.requested.v1.json`), checked by
+  `NotificationRequestContractTest`; `UserEventsCopyContractTest` checks the service's own copies of
+  `evt.user.registered` and `evt.password.reset` against `krizaka-users-api`'s schemas (`krizaka-users-api` in test
+  scope only; CI builds `krizaka-users` first).
+
 ### Changed
 
 - Built on `krizaka-parent` and `krizaka-platform-kit` **0.2.0** (released on Maven Central); this repository's

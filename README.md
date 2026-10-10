@@ -69,6 +69,11 @@ Every queue has a `<queue>.dlq`, retries back off exponentially and deliveries a
 Publish a `NotificationRequest` (channel, recipient, template, variables) as JSON on the events exchange with the
 routing key `evt.notification.requested` and a `messageId` — a redelivery is then sent once.
 
+The request's JSON Schema (draft 2020-12) ships in `krizaka-notifications-api` at
+`events/evt.notification.requested.v1.json`; a publisher can check what it sends with `krizaka-test-support`'s
+`EventContractTest`. The users events this service consumes are checked the other way round: its own copies read what
+`krizaka-users-api`'s schemas accept.
+
 ## Run the service
 
 ```bash

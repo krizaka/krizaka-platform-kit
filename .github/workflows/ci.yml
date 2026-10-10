@@ -22,5 +22,5 @@ jobs:
   maven:
     uses: krizaka/.github/.github/workflows/maven.yml@main
     with:
-      upstreams: "krizaka-build krizaka-platform-kit"
+      upstreams: "krizaka-build krizaka-platform-kit krizaka-users"
     secrets: inherit

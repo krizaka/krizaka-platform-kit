@@ -26,6 +26,12 @@
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- EventContractTest: the request validates against its schema. -->
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-test-support</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

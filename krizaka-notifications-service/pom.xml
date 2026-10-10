@@ -79,6 +79,14 @@
             <artifactId>archunit-junit5</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- The schemas of the users events this service keeps a copy of (UserEventsCopyContractTest).
+             Test scope only: the service reads the events into its own records, never into
+             krizaka-users' classes. -->
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-users-api</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
