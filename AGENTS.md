@@ -16,6 +16,10 @@
 - **Wire names are a contract**: the exchange and queue names in `AmqpConstants` are shared with the producers; changing
   one is a coordinated migration, not a refactor.
 - **Configuration** lives under `krizaka.notifications.*`, typed by self-validating records.
+- **Services ship as Docker images, never on Maven Central.** Only the libraries (`-api`, `-client`, …) are published; a
+  `*-service` host sets `maven.deploy.skip` and is listed in the root POM's `central-publishing-maven-plugin`
+  `excludeArtifacts` (the plugin stages every module of the reactor otherwise). The `publishable-artifact-size` enforcer
+  rule fails `verify` when a published jar exceeds 5 MB — a runnable (fat) jar never reaches Central.
 
 ## Definition of done
 

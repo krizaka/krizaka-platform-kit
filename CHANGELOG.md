@@ -6,6 +6,14 @@ Every Krizaka JVM artifact is released at the same version.
 
 ## [Unreleased]
 
+### Changed
+
+- Built on `krizaka-parent` and `krizaka-platform-kit` **0.2.0** (released on Maven Central); this repository's
+  version follows the parent (0.2.0, not yet released).
+- The service host is never published to Maven Central: it is excluded from the Central bundle by name
+  (`excludeArtifacts`) and ships as a Docker image; the `publishable-artifact-size` enforcer rule fails `verify` when a
+  published jar exceeds 5 MB.
+
 ## [0.1.0]
 
 First release as a Krizaka building block (formerly `orazaka-notifications`, part of the Orazaka platform).
