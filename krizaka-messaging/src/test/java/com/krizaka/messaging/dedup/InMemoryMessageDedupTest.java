@@ -2,11 +2,13 @@ package com.krizaka.messaging.dedup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
@@ -84,5 +86,43 @@ class InMemoryMessageDedupTest {
         .isThrownBy(() -> new InMemoryMessageDedup(Clock.systemUTC(), Duration.ZERO, 10));
     assertThatIllegalArgumentException()
         .isThrownBy(() -> new InMemoryMessageDedup(Clock.systemUTC(), Duration.ofHours(1), 0));
+  }
+
+  @Test
+  void processOnceRunsTheHandlerOncePerMessage() {
+    AtomicInteger runs = new AtomicInteger();
+
+    assertThat(dedup.processOnce("notifications", "m-1", runs::incrementAndGet)).isTrue();
+    assertThat(dedup.processOnce("notifications", "m-1", runs::incrementAndGet)).isFalse();
+
+    assertThat(runs).hasValue(1);
+  }
+
+  @Test
+  void processOnceGivesTheClaimBackWhenTheHandlerFails() {
+    assertThatIllegalStateException()
+        .isThrownBy(
+            () ->
+                dedup.processOnce(
+                    "notifications",
+                    "m-1",
+                    () -> {
+                      throw new IllegalStateException("smtp down");
+                    }))
+        .withMessage("smtp down");
+
+    AtomicInteger runs = new AtomicInteger();
+    assertThat(dedup.processOnce("notifications", "m-1", runs::incrementAndGet))
+        .as("the redelivery is processed, not dropped")
+        .isTrue();
+    assertThat(runs).hasValue(1);
+  }
+
+  @Test
+  void aMessageWithoutAnIdAlwaysRunsTheHandler() {
+    AtomicInteger runs = new AtomicInteger();
+    dedup.processOnce("notifications", null, runs::incrementAndGet);
+    dedup.processOnce("notifications", null, runs::incrementAndGet);
+    assertThat(runs).hasValue(2);
   }
 }
