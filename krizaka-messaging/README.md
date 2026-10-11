@@ -65,8 +65,7 @@ Declarables userEvents(MessagingExchanges exchanges) {
 
 @RabbitListener(queues = "krizaka.notifications.user-events")
 void onRegistered(UserRegistered event, @Header(AmqpHeaders.MESSAGE_ID) String messageId) {
-  if (!dedup.claim("notifications.user-events", messageId)) return;   // already processed
-  try { welcome(event); } catch (RuntimeException e) { dedup.release("notifications.user-events", messageId); throw e; }
+  dedup.processOnce("notifications.user-events", messageId, () -> welcome(event));   // claim, run, release on failure
 }
 ```
 
@@ -169,7 +168,8 @@ krizaka:
 ```
 
 `MessageDedup.claim` is one `INSERT` arbitrated by the primary key; `release` gives the claim back when the handler
-fails, so the redelivery is processed instead of dropped. The table:
+fails, so the redelivery is processed instead of dropped. `processOnce(consumer, messageId, handler)` is the two
+together — the shape every listener needs — and rethrows the failure unchanged, so retry and the DLQ still apply. The table:
 
 ```sql
 CREATE TABLE processed_messages (

@@ -77,7 +77,7 @@ krizaka:
         <dependency>
             <groupId>com.krizaka</groupId>
             <artifactId>krizaka-bom</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.0</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -179,6 +179,13 @@ A quorum queue and its `<queue>.dlq`; the kit's listener container retries a fai
 (`krizaka.messaging.retry.*`, 5 attempts from 500 ms by default) and then dead-letters it with its headers. Pair it
 with `MessageDedup` (`krizaka.messaging.dedup.store=jdbc|memory`): `claim` is one `INSERT`, `release` gives the claim
 back when the handler fails, so a redelivery is processed once and a failure is never silently dropped.
+
+```java
+@RabbitListener(queues = "krizaka.notifications.user-events")
+void onRegistered(UserRegistered event, @Header(AmqpHeaders.MESSAGE_ID) String messageId) {
+  dedup.processOnce("notifications.user-events", messageId, () -> welcome(event));
+}
+```
 
 Every `OutboxStore` bean gets a relay; **`lockPendingBatch` must claim its rows** (`FOR UPDATE SKIP LOCKED`). The
 recommended outbox schema, the event versioning rules and the naming conventions:
