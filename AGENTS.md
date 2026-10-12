@@ -28,6 +28,15 @@ ADR-073, which created this kit).
   `krizaka-build.version` move together, to a `krizaka-build` release, before a kit release.
 - **Public API is documented.** Every public type and method has javadoc; `./mvnw verify -Prelease -Dgpg.skip` lints it.
 
+## Tests
+
+- **No test, not done.** Every feature and every fix ships with its tests in the same pull request: a unit test for the
+  invariant it carries, an `ApplicationContextRunner` test for every auto-configuration condition, an integration test
+  for a starter (above).
+- **A fix starts with a failing test** that reproduces the bug; the fix turns it green and the test stays as the guard.
+- CI runs them on every pull request and must be green. A test is never skipped, `@Disabled`, weakened or
+  deleted to get there.
+
 ## Definition of done
 
 1. `./mvnw verify -Prelease -Dgpg.skip` is green.
