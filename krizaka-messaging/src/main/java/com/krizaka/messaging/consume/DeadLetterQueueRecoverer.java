@@ -10,8 +10,9 @@ import org.springframework.amqp.rabbit.retry.RepublishMessageRecoverer;
  *
  * <p>It is republished to the dead-letter exchange with the routing key {@code <consumerQueue>.dlq}
  * — the binding {@link KrizakaQueues#consumer} declares — keeping every original header (the event
- * envelope included) and adding Spring AMQP's {@code x-exception-*}, {@code x-original-exchange}
- * and {@code x-original-routingKey}, so the dead letter says what failed and why.
+ * envelope included) and adding Spring AMQP's {@code x-exception-*} (the stack trace included —
+ * opted in, since Spring AMQP 4.0.5 leaves it out by default), {@code x-original-exchange} and
+ * {@code x-original-routingKey}, so the dead letter says what failed and why.
  */
 public class DeadLetterQueueRecoverer extends RepublishMessageRecoverer {
 
@@ -23,6 +24,8 @@ public class DeadLetterQueueRecoverer extends RepublishMessageRecoverer {
    */
   public DeadLetterQueueRecoverer(AmqpTemplate template, String deadLetterExchange) {
     super(template, deadLetterExchange);
+    // Spring AMQP 4.0.5+ adds the stack trace only on opt-in: the dead letter must say why.
+    includeStackTrace(true);
   }
 
   /**
