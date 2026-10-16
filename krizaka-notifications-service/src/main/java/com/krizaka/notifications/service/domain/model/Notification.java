@@ -22,7 +22,7 @@ public record Notification(
     if (recipient == null || recipient.isBlank()) {
       throw new IllegalArgumentException("recipient is required");
     }
-    subject = (subject == null) ? "" : subject.strip();
+    subject = subject == null ? "" : subject.strip();
     if (body == null || body.isBlank()) {
       throw new IllegalArgumentException("a notification needs a body");
     }

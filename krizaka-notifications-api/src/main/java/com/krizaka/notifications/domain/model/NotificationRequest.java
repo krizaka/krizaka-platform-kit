@@ -39,13 +39,13 @@ public record NotificationRequest(
       throw new IllegalArgumentException("template must be a lower-kebab-case key: " + template);
     }
     locale =
-        (locale == null || locale.isBlank())
+        locale == null || locale.isBlank()
             ? "en"
             : Locale.forLanguageTag(locale.strip()).getLanguage();
     if (locale.isEmpty()) {
       locale = "en";
     }
-    variables = (variables == null) ? Map.of() : Map.copyOf(variables);
+    variables = variables == null ? Map.of() : Map.copyOf(variables);
     recipient = recipient.strip();
   }
 }

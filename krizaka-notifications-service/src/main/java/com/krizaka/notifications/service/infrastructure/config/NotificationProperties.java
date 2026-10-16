@@ -27,12 +27,12 @@ public record NotificationProperties(
       throw new IllegalArgumentException("krizaka.notifications.from-address is required");
     }
     templateLocation =
-        (templateLocation == null || templateLocation.isBlank())
+        templateLocation == null || templateLocation.isBlank()
             ? "classpath:templates/"
             : (templateLocation.endsWith("/") ? templateLocation : templateLocation + "/");
     Objects.requireNonNull(links, "krizaka.notifications.links is required");
-    twilio = (twilio == null) ? new Twilio(null, null, null, null) : twilio;
-    webhook = (webhook == null) ? new Webhook(List.of()) : webhook;
+    twilio = twilio == null ? new Twilio(null, null, null, null) : twilio;
+    webhook = webhook == null ? new Webhook(List.of()) : webhook;
   }
 
   /**
@@ -81,7 +81,7 @@ public record NotificationProperties(
   public record Twilio(String accountSid, String authToken, String fromNumber, String baseUrl) {
 
     public Twilio {
-      baseUrl = (baseUrl == null || baseUrl.isBlank()) ? "https://api.twilio.com" : baseUrl;
+      baseUrl = baseUrl == null || baseUrl.isBlank() ? "https://api.twilio.com" : baseUrl;
     }
 
     /** {@code true} when every credential needed to send is present. */
@@ -105,7 +105,7 @@ public record NotificationProperties(
 
     public Webhook {
       allowedHosts =
-          (allowedHosts == null)
+          allowedHosts == null
               ? List.of()
               : allowedHosts.stream()
                   .filter(host -> host != null && !host.isBlank())

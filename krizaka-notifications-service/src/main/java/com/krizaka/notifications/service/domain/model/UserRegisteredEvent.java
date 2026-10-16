@@ -33,14 +33,14 @@ public record UserRegisteredEvent(UserSummary user, String plaintextToken) {
 
     public UserSummary {
       Objects.requireNonNull(email, "email is required");
-      username = (username == null || username.isBlank()) ? email : username;
-      preferences = (preferences == null) ? Map.of() : Map.copyOf(preferences);
+      username = username == null || username.isBlank() ? email : username;
+      preferences = preferences == null ? Map.of() : Map.copyOf(preferences);
     }
 
     /** The user's preferred language, {@code en} when none was recorded. */
     public String language() {
       Object language = preferences.get("language");
-      return (language == null || String.valueOf(language).isBlank())
+      return language == null || String.valueOf(language).isBlank()
           ? "en"
           : String.valueOf(language);
     }
