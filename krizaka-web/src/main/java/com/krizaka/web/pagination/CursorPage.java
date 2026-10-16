@@ -35,7 +35,7 @@ public record CursorPage<T>(List<T> items, String nextCursor) {
       return new CursorPage<>(fetched, null);
     }
     List<T> items = fetched.subList(0, cursor.limit());
-    String last = String.valueOf(key.apply(items.get(items.size() - 1)));
+    String last = String.valueOf(key.apply(items.getLast()));
     return new CursorPage<>(items, new Cursor(last, cursor.limit()).encode());
   }
 

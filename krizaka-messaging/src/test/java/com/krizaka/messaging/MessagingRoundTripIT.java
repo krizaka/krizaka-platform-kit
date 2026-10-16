@@ -126,7 +126,7 @@ class MessagingRoundTripIT extends AbstractContainerIntegrationTest {
     await().atMost(Duration.ofSeconds(20)).until(() -> listeners.flakySucceeded.get() == 1);
     assertThat(listeners.flakyAttempts).hasSize(3);
     Duration firstWait =
-        Duration.between(listeners.flakyAttempts.get(0), listeners.flakyAttempts.get(1));
+        Duration.between(listeners.flakyAttempts.getFirst(), listeners.flakyAttempts.get(1));
     Duration secondWait =
         Duration.between(listeners.flakyAttempts.get(1), listeners.flakyAttempts.get(2));
     assertThat(firstWait).isGreaterThanOrEqualTo(Duration.ofMillis(180));

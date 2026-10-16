@@ -60,10 +60,8 @@ class KrizakaObservabilityEnvironmentPostProcessorTest {
             environment.getPropertySources().stream()
                 .filter(
                     source ->
-                        source
-                            .getName()
-                            .equals(
-                                KrizakaObservabilityEnvironmentPostProcessor.PROPERTY_SOURCE_NAME))
+                        KrizakaObservabilityEnvironmentPostProcessor.PROPERTY_SOURCE_NAME.equals(
+                            source.getName()))
                 .count())
         .isOne();
   }

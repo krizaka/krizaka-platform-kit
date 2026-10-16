@@ -1,5 +1,6 @@
 package com.krizaka.web.problem;
 
+import java.io.Serial;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.http.HttpStatus;
  */
 public class ConflictException extends DomainException {
 
-  private static final long serialVersionUID = 1L;
+  @Serial private static final long serialVersionUID = 1L;
 
   /** The default code. */
   public static final String CODE = "conflict";

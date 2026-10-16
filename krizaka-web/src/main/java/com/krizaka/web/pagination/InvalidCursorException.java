@@ -1,6 +1,7 @@
 package com.krizaka.web.pagination;
 
 import com.krizaka.web.problem.DomainException;
+import java.io.Serial;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -8,7 +9,7 @@ import org.springframework.http.HttpStatus;
  */
 public class InvalidCursorException extends DomainException {
 
-  private static final long serialVersionUID = 1L;
+  @Serial private static final long serialVersionUID = 1L;
 
   /** The problem code. */
   public static final String CODE = "invalid-cursor";
