@@ -10,10 +10,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * The structure of {@code krizaka-security}: layers do not apply to a library, so the rules that do
- * — no standard streams, no field injection, no cycles, names, configuration only in config,
- * transactions only on services — are all checked strictly. A rule that fails later is fixed, or
- * (existing debt only) frozen with {@code FrozenRules}.
+ * The structure of {@code krizaka-security}: layers, controllers, services and repositories do not
+ * apply to a library (no rule here passes over nothing, GOV-006), so the rules that do — no
+ * standard streams, no field injection, no cycles, the environment read in configuration only — are
+ * all checked strictly. A rule that fails later is fixed, or (existing debt only) frozen with
+ * {@code FrozenRules}.
  */
 class SecurityGovernanceTest {
 
@@ -53,34 +54,9 @@ class SecurityGovernanceTest {
   }
 
   @Test
-  @DisplayName("Controllers, services and repositories are named for what they are")
-  void namingConventions() {
+  @DisplayName("The environment is read in configuration only")
+  void environmentOnlyInConfig() {
     assertDoesNotThrow(
-        () -> {
-          ArchitectureRules.controllersNamedControllerRule().check(classes);
-          ArchitectureRules.servicesNamedServiceRule().check(classes);
-          ArchitectureRules.repositoriesNamedRepositoryRule().check(classes);
-        });
-  }
-
-  @Test
-  @DisplayName("@Value and the environment are read in configuration only")
-  void configurationOnlyInConfig() {
-    assertDoesNotThrow(
-        () -> {
-          ArchitectureRules.valueOnlyInConfigRule("..config..").check(classes);
-          ArchitectureRules.noEnvironmentOutsideConfigRule("..config..").check(classes);
-        });
-  }
-
-  @Test
-  @DisplayName("A transaction starts on a service only")
-  void transactionalOnlyOnServices() {
-    assertDoesNotThrow(
-        () -> {
-          ArchitectureRules.transactionalOnlyOnServicesRule(
-                  "..service..", "..outbox..", "..dedup..")
-              .check(classes);
-        });
+        () -> ArchitectureRules.noEnvironmentOutsideConfigRule("..config..").check(classes));
   }
 }
