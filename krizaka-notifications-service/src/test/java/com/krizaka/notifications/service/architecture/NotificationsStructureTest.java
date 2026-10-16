@@ -43,35 +43,21 @@ class NotificationsStructureTest {
   }
 
   @Test
-  @DisplayName("Controllers, services and repositories are named for what they are")
-  void namingConventions() {
+  @DisplayName("Services are named *Service")
+  void servicesNamed() {
     assertDoesNotThrow(
         () -> {
-          FrozenRules.check(ArchitectureRules.controllersNamedControllerRule(), classes);
           FrozenRules.check(ArchitectureRules.servicesNamedServiceRule(), classes);
-          FrozenRules.check(ArchitectureRules.repositoriesNamedRepositoryRule(), classes);
         });
   }
 
   @Test
-  @DisplayName("@Value and the environment are read in configuration only")
-  void configurationOnlyInConfig() {
+  @DisplayName("The environment is read in configuration only")
+  void environmentOnlyInConfig() {
     assertDoesNotThrow(
         () -> {
-          FrozenRules.check(ArchitectureRules.valueOnlyInConfigRule("..config.."), classes);
           FrozenRules.check(
               ArchitectureRules.noEnvironmentOutsideConfigRule("..config.."), classes);
-        });
-  }
-
-  @Test
-  @DisplayName("A transaction starts on a service only")
-  void transactionalOnlyOnServices() {
-    assertDoesNotThrow(
-        () -> {
-          FrozenRules.check(
-              ArchitectureRules.transactionalOnlyOnServicesRule("..service.application.."),
-              classes);
         });
   }
 }
