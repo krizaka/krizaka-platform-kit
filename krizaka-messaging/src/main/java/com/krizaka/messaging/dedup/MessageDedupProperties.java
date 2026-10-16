@@ -18,7 +18,7 @@ public record MessageDedupProperties(Store store, String table) {
 
   /** Normalises the defaults. */
   public MessageDedupProperties {
-    table = (table == null || table.isBlank()) ? JdbcMessageDedup.DEFAULT_TABLE : table;
+    table = table == null || table.isBlank() ? JdbcMessageDedup.DEFAULT_TABLE : table;
   }
 
   /** The two claim stores. */

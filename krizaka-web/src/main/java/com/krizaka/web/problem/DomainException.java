@@ -1,5 +1,6 @@
 package com.krizaka.web.problem;
 
+import java.io.Serial;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 
@@ -18,7 +19,7 @@ import org.springframework.http.HttpStatus;
  */
 public abstract class DomainException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
+  @Serial private static final long serialVersionUID = 1L;
 
   private static final Pattern CODE = Pattern.compile("[a-z0-9]+(-[a-z0-9]+)*");
 

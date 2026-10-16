@@ -60,7 +60,7 @@ class OutboxEventPublisherTest {
     events.publish("evt.user.registered", 1, new UserRegistered("u-1", "a@b.c"));
     events.publish("evt.user.registered", 1, new UserRegistered("u-1", "a@b.c"));
 
-    String first = store.appended.get(0).messageId();
+    String first = store.appended.getFirst().messageId();
     String second = store.appended.get(1).messageId();
     assertThat(UUID.fromString(first)).isNotNull();
     assertThat(first).isNotEqualTo(second);
