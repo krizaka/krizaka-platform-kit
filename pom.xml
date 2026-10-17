@@ -54,6 +54,7 @@
         <module>krizaka-messaging</module>
         <module>krizaka-web</module>
         <module>krizaka-observability</module>
+        <module>krizaka-app-config</module>
         <module>starters</module>
         <module>examples/krizaka-starters-example</module>
     </modules>

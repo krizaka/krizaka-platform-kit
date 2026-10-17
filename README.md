@@ -39,6 +39,7 @@ tested.
 | [`krizaka-messaging`](krizaka-messaging) | `com.krizaka:krizaka-messaging` | **Events through the outbox** with their envelope in AMQP headers, consumer queues with **retry then DLQ**, **idempotent consumption** and the **transactional outbox relay** for RabbitMQ |
 | [`krizaka-web`](krizaka-web) | `com.krizaka:krizaka-web` | **RFC 9457 Problem Details** with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
 | [`krizaka-observability`](krizaka-observability) | `com.krizaka:krizaka-observability` | **Required service names** (product, service, version) as common metric tags, ECS JSON logs, health/info/prometheus exposed, 10 % trace sampling — defaults at the lowest priority |
+| [`krizaka-app-config`](krizaka-app-config) | `com.krizaka:krizaka-app-config` | **App version compatibility**: a public cached `GET /api/v1/app-config` (minimum and latest version, update mode, maintenance, contract range, store URL, flags, localized message) read from database parameters, **`426 Upgrade Required`** below the minimum, N-1 contract compatibility with `Deprecation`/`Sunset`, an audited admin API with rollback |
 
 Requires Java 21 and Spring Boot 4.0.
 
@@ -53,6 +54,7 @@ capabilities, never the Spring list behind them; a Spring Boot upgrade changes t
 | `com.krizaka:krizaka-spring-boot-starter-security` | `krizaka-security` + `spring-boot-starter-security` + `-oauth2-resource-server` |
 | `com.krizaka:krizaka-spring-boot-starter-rabbitmq` | `krizaka-messaging` + `spring-boot-starter-amqp` + `-jdbc` + `-jackson` (add your JDBC driver) |
 | `com.krizaka:krizaka-spring-boot-starter-observability` | `krizaka-observability` + `spring-boot-starter-actuator` + OpenTelemetry tracing (`spring-boot-micrometer-tracing-opentelemetry`, `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`) + `micrometer-registry-prometheus` |
+| `com.krizaka:krizaka-spring-boot-starter-app-config` | `krizaka-app-config` + `spring-boot-starter-webmvc` + `-jdbc` |
 
 The whole configuration of a service on the four starters — everything else is a kit default you can override
 ([`examples/krizaka-starters-example`](examples/krizaka-starters-example), started on real PostgreSQL and RabbitMQ by
@@ -220,6 +222,16 @@ unexpected is a `500` whose message is logged with the `requestId`, never sent. 
 sent back and put in the MDC; Jackson writes ISO dates and omits nulls; `Cursor` / `CursorPage` page by key with an
 opaque token; CORS opens only the origins listed in `krizaka.web.cors.allowed-origins`. The full contract:
 [krizaka-web/README.md](krizaka-web/README.md).
+
+## krizaka-app-config
+
+A mobile or desktop app outlives the API it calls. The app sends `X-Client-Platform`, `X-Client-Version` and
+`X-Contract-Version`; the service answers `426 Upgrade Required` (Problem Details carrying the `appConfig` payload) below
+the minimum, keeps the previous contract working with `Deprecation` / `Sunset`, and publishes
+`GET /api/v1/app-config?platform=ios&version=1.4.0` for the launch and resume checks. Every value is a database
+parameter with safety bounds, a reason and an audit trail; the contract is shared with the TypeScript package
+`@krizaka/app-config` through one JSON schema and one fixture. Full contract and wiring:
+[krizaka-app-config/README.md](krizaka-app-config/README.md).
 
 ## krizaka-observability
 

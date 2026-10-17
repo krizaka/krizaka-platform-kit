@@ -1,0 +1,632 @@
+{
+  "description": "One fixture, two implementations: krizaka-app-config (Java) and @krizaka/app-config (TypeScript) both evaluate every case and must agree. 'config' is the admin API shape; 'expect.payload' is a subset of the public payload; 'expect.guard' is what the 426 filter does (status, code of the problem, Deprecation and Sunset headers).",
+  "cases": [
+    {
+      "name": "permissive defaults let everybody in",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.0.0",
+        "contract": 1
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "none",
+          "minSupportedVersion": "0.0.0"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "no version sent means no prompt",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "2.0.0",
+        "latestVersion": "3.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {},
+      "expect": {
+        "payload": {
+          "updateMode": "none"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "below latest, above minimum is a soft update",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.2.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": null,
+        "storeUrl": "https://apps.apple.com/app/id1",
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {
+          "en": "A new version is available.",
+          "fr": "Une nouvelle version est disponible."
+        },
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.3.0",
+        "contract": 1
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "soft",
+          "message": "A new version is available.",
+          "storeUrl": "https://apps.apple.com/app/id1",
+          "locale": "en"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "the minimum itself is still allowed",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.2.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.2.0"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "soft"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "the latest needs no update",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.2.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.4.0"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "none"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "a newer-than-latest build (beta, TestFlight) needs no update",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.2.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.5.0-beta.1"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "none"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "below the minimum is forced and refused with 426",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.2.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": null,
+        "storeUrl": "https://apps.apple.com/app/id1",
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {
+          "en": "A new version is available.",
+          "fr": "Une nouvelle version est disponible."
+        },
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.1.9",
+        "contract": 1
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "force"
+        },
+        "guard": {
+          "status": 426,
+          "code": "upgrade-required"
+        }
+      }
+    },
+    {
+      "name": "versions compare numerically, not as text",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.10.0",
+        "latestVersion": "1.10.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.9.0"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "force"
+        },
+        "guard": {
+          "status": 426,
+          "code": "upgrade-required"
+        }
+      }
+    },
+    {
+      "name": "a short version reads as major.minor.0",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.4.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.4"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "none"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "the operator can force everybody",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.0.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": "force",
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.4.0"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "force"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "the operator can silence the prompt, the minimum still holds",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.2.0",
+        "latestVersion": "1.4.0",
+        "updateOverride": "none",
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.1.0"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "none"
+        },
+        "guard": {
+          "status": 426,
+          "code": "upgrade-required"
+        }
+      }
+    },
+    {
+      "name": "a contract below the minimum is refused",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 2,
+        "contractMax": 3,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.0.0",
+        "contract": 1
+      },
+      "expect": {
+        "payload": {},
+        "guard": {
+          "status": 426,
+          "code": "contract-unsupported"
+        }
+      }
+    },
+    {
+      "name": "N-1: the previous contract is served with Deprecation and Sunset",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 2,
+        "contractSunset": "2026-12-31",
+        "flags": {}
+      },
+      "client": {
+        "version": "1.0.0",
+        "contract": 1
+      },
+      "expect": {
+        "payload": {},
+        "guard": {
+          "status": 200,
+          "deprecation": true,
+          "sunset": "Fri, 01 Jan 2027 00:00:00 GMT"
+        }
+      }
+    },
+    {
+      "name": "N-1 without an announced date has Deprecation only",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 2,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "contract": 1
+      },
+      "expect": {
+        "payload": {},
+        "guard": {
+          "status": 200,
+          "deprecation": true
+        }
+      }
+    },
+    {
+      "name": "the current contract is not deprecated",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 2,
+        "contractSunset": "2026-12-31",
+        "flags": {}
+      },
+      "client": {
+        "contract": 2
+      },
+      "expect": {
+        "payload": {},
+        "guard": {
+          "status": 200,
+          "deprecation": false
+        }
+      }
+    },
+    {
+      "name": "a client newer than the backend passes",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 2,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "contract": 3
+      },
+      "expect": {
+        "payload": {},
+        "guard": {
+          "status": 200,
+          "deprecation": false
+        }
+      }
+    },
+    {
+      "name": "no contract header passes",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 2,
+        "contractMax": 3,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.0.0"
+      },
+      "expect": {
+        "payload": {},
+        "guard": {
+          "status": 200,
+          "deprecation": false
+        }
+      }
+    },
+    {
+      "name": "maintenance in French",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": true,
+        "maintenanceMessage": {
+          "en": "Back in a few minutes.",
+          "fr": "De retour dans quelques minutes."
+        },
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.0.0",
+        "language": "fr"
+      },
+      "expect": {
+        "payload": {
+          "maintenance": {
+            "on": true,
+            "message": "De retour dans quelques minutes."
+          },
+          "locale": "fr"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "an unknown language falls back to English",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "1.0.0",
+        "latestVersion": "2.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": true,
+        "maintenanceMessage": {
+          "en": "Back in a few minutes.",
+          "fr": "De retour dans quelques minutes."
+        },
+        "message": {
+          "en": "A new version is available.",
+          "fr": "Une nouvelle version est disponible."
+        },
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "1.0.0",
+        "language": "de"
+      },
+      "expect": {
+        "payload": {
+          "maintenance": {
+            "on": true,
+            "message": "Back in a few minutes."
+          },
+          "message": "A new version is available.",
+          "locale": "en"
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "flags travel as they are",
+      "platform": "ios",
+      "config": {
+        "minSupportedVersion": "0.0.0",
+        "latestVersion": "0.0.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {
+          "voiceChat": true,
+          "maxUploadMb": 50,
+          "banner": "spring"
+        }
+      },
+      "client": {},
+      "expect": {
+        "payload": {
+          "flags": {
+            "voiceChat": true,
+            "maxUploadMb": 50,
+            "banner": "spring"
+          }
+        },
+        "guard": {
+          "status": 200
+        }
+      }
+    },
+    {
+      "name": "the Mac app is a platform like the others",
+      "platform": "macos",
+      "config": {
+        "minSupportedVersion": "0.3.0",
+        "latestVersion": "0.4.0",
+        "updateOverride": null,
+        "storeUrl": null,
+        "maintenanceOn": false,
+        "maintenanceMessage": {},
+        "message": {},
+        "contractMin": 1,
+        "contractMax": 1,
+        "contractSunset": null,
+        "flags": {}
+      },
+      "client": {
+        "version": "0.2.0"
+      },
+      "expect": {
+        "payload": {
+          "updateMode": "force",
+          "platform": "macos"
+        },
+        "guard": {
+          "status": 426,
+          "code": "upgrade-required"
+        }
+      }
+    }
+  ]
+}
