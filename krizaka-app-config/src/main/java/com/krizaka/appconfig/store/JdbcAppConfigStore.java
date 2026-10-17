@@ -76,9 +76,8 @@ public final class JdbcAppConfigStore implements AppConfigStore {
   public AppConfig publish(AppConfig config, String actor, String reason) {
     InMemoryAppConfigStore.requireReason(reason);
     Objects.requireNonNull(actor, "actor");
-    AppConfig published =
-        jdbc.queryForObject(
-            """
+    return jdbc.queryForObject(
+        """
             WITH upsert AS (
               INSERT INTO app_config (platform, min_supported_version, latest_version, update_override,
                   store_url, maintenance_on, maintenance_message, message, contract_min, contract_max,
@@ -110,24 +109,23 @@ public final class JdbcAppConfigStore implements AppConfigStore {
               FROM upsert)
             SELECT revision, updated_at FROM upsert
             """,
-            (rs, row) ->
-                config.published(
-                    rs.getInt("revision"), rs.getTimestamp("updated_at").toInstant(), actor),
-            config.platform().wire(),
-            config.minSupportedVersion().toString(),
-            config.latestVersion().toString(),
-            config.updateOverride() == null ? null : config.updateOverride().wire(),
-            config.storeUrl(),
-            config.maintenanceOn(),
-            write(config.maintenanceMessage()),
-            write(config.message()),
-            config.contractMin(),
-            config.contractMax(),
-            config.contractSunset() == null ? null : java.sql.Date.valueOf(config.contractSunset()),
-            write(config.flags()),
-            actor,
-            reason);
-    return published;
+        (rs, row) ->
+            config.published(
+                rs.getInt("revision"), rs.getTimestamp("updated_at").toInstant(), actor),
+        config.platform().wire(),
+        config.minSupportedVersion().toString(),
+        config.latestVersion().toString(),
+        config.updateOverride() == null ? null : config.updateOverride().wire(),
+        config.storeUrl(),
+        config.maintenanceOn(),
+        write(config.maintenanceMessage()),
+        write(config.message()),
+        config.contractMin(),
+        config.contractMax(),
+        config.contractSunset() == null ? null : java.sql.Date.valueOf(config.contractSunset()),
+        write(config.flags()),
+        actor,
+        reason);
   }
 
   @Override
