@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- A starter is a POM, not code: the code is in the module it names. -->
+    <parent>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-spring-boot-starters</artifactId>
+        <version>0.2.0</version>
+    </parent>
+
+    <artifactId>krizaka-spring-boot-starter-app-config</artifactId>
+    <name>Krizaka Spring Boot Starter App Config</name>
+    <description>App version compatibility in one dependency: krizaka-app-config (the public app-config endpoint, the 426 Upgrade Required filter, N-1 contract compatibility, the audited admin API) with Spring MVC and JDBC.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-app-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+    </dependencies>
+</project>

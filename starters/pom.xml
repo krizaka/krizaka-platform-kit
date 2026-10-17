@@ -26,6 +26,7 @@
         <module>krizaka-spring-boot-starter-security</module>
         <module>krizaka-spring-boot-starter-rabbitmq</module>
         <module>krizaka-spring-boot-starter-observability</module>
+        <module>krizaka-spring-boot-starter-app-config</module>
     </modules>
 
     <dependencies>

@@ -12,11 +12,13 @@
         "krizaka-messaging/pom.xml",
         "krizaka-web/pom.xml",
         "krizaka-observability/pom.xml",
+        "krizaka-app-config/pom.xml",
         "starters/pom.xml",
         "starters/krizaka-spring-boot-starter-web/pom.xml",
         "starters/krizaka-spring-boot-starter-security/pom.xml",
         "starters/krizaka-spring-boot-starter-rabbitmq/pom.xml",
         "starters/krizaka-spring-boot-starter-observability/pom.xml",
+        "starters/krizaka-spring-boot-starter-app-config/pom.xml",
         "examples/krizaka-starters-example/pom.xml"
       ]
     }
