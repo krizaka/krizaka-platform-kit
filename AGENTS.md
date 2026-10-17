@@ -1,8 +1,9 @@
 # krizaka-platform-kit — Scope (agent-neutral)
 
 > Cross-cutting building blocks for Spring Boot services, published on Maven Central as `com.krizaka:krizaka-security`,
-> `com.krizaka:krizaka-messaging`, `com.krizaka:krizaka-web`, `com.krizaka:krizaka-observability` and the four
-> `krizaka-spring-boot-starter-*`. Orazaka consumes them; so can any application. When
+> `com.krizaka:krizaka-messaging`, `com.krizaka:krizaka-web`, `com.krizaka:krizaka-observability`,
+> `com.krizaka:krizaka-app-config` (app version compatibility: `GET /api/v1/app-config`, `426 Upgrade Required`, N-1
+> contracts — twin of `@krizaka/app-config` in krizaka-ui, same fixture) and the five `krizaka-spring-boot-starter-*`. Orazaka consumes them; so can any application. When
 > this repository is cloned inside the Orazaka workspace (`krizaka/krizaka-platform-kit`), the workspace contract
 > ([`krizaka/orazaka/AGENTS.md`](https://github.com/krizaka/orazaka/blob/main/AGENTS.md)) applies as well.
 

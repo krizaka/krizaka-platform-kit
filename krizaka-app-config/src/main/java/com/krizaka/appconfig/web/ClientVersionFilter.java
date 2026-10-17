@@ -167,7 +167,6 @@ public final class ClientVersionFilter extends OncePerRequestFilter {
     problem.put("appConfig", body);
     response.setStatus(426);
     response.setHeader("Upgrade", "krizaka-app/" + config.minSupportedVersion());
-    response.setHeader("Connection", "Upgrade");
     response.setHeader("Cache-Control", "no-store");
     response.setContentType("application/problem+json");
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());

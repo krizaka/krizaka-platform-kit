@@ -38,7 +38,11 @@ class AppConfigStarterIT {
   @Test
   void theEndpointAnswersWithoutAnyConfiguration() {
     ResponseEntity<String> response =
-        client().get().uri("/api/v1/app-config?platform=ios&version=1.0.0").retrieve().toEntity(String.class);
+        client()
+            .get()
+            .uri("/api/v1/app-config?platform=ios&version=1.0.0")
+            .retrieve()
+            .toEntity(String.class);
 
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     assertThat(response.getBody())

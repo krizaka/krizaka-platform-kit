@@ -33,7 +33,7 @@ public final class InMemoryAppConfigStore implements AppConfigStore {
     List<AppConfigChange> changes = trail.get(platform);
     return changes == null || changes.isEmpty()
         ? Optional.empty()
-        : Optional.of(changes.get(changes.size() - 1).config());
+        : Optional.of(changes.getLast().config());
   }
 
   @Override
