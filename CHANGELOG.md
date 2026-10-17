@@ -5,6 +5,29 @@ artifact is the one `krizaka-bom` carries. Releases are written by
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.3.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.2.0...v0.3.0) (2026-10-17)
+
+
+### Features
+
+* **app-config:** krizaka-app-config — app version compatibility, 426 Upgrade Required and N-1 contracts ([#36](https://github.com/krizaka/krizaka-platform-kit/issues/36)) ([7ada484](https://github.com/krizaka/krizaka-platform-kit/commit/7ada4843a92518a1798963d9bd51368145203a5a))
+* **messaging:** MessageDedup.processOnce — claim, run, give the claim back on failure ([#12](https://github.com/krizaka/krizaka-platform-kit/issues/12)) ([2fa3723](https://github.com/krizaka/krizaka-platform-kit/commit/2fa372333144b6284f341075453a17c35afe3213))
+
+
+### Bug Fixes
+
+* **deps:** security overrides of the Boot BOM (jackson 3.1.7/2.21.7, amqp-client 5.37.0, opentelemetry 1.62.0, tomcat 11.0.25); release-please token read-only at top level ([#34](https://github.com/krizaka/krizaka-platform-kit/issues/34)) ([257d7df](https://github.com/krizaka/krizaka-platform-kit/commit/257d7df6fd28ba07407d2d145111abb07ae353e7))
+* **messaging:** the dead letter keeps its stack trace — opt in, Spring AMQP 4.0.5 leaves it out by default ([#25](https://github.com/krizaka/krizaka-platform-kit/issues/25)) ([8910317](https://github.com/krizaka/krizaka-platform-kit/commit/8910317c73a5d1186f9175ec28ab4d6a2e036810))
+* **test:** governance tests apply only the rules whose subject the library has (no vacuous rule, GOV-006) ([#33](https://github.com/krizaka/krizaka-platform-kit/issues/33)) ([a02e27f](https://github.com/krizaka/krizaka-platform-kit/commit/a02e27f2f9fc3a8ad894285f854fd7b334d42f7a))
+
+
+### Documentation
+
+* **agents:** no test, not done — every feature and fix ships with its tests ([#23](https://github.com/krizaka/krizaka-platform-kit/issues/23)) ([ee2259c](https://github.com/krizaka/krizaka-platform-kit/commit/ee2259c735b24668cbc4b359c498970825ab309f))
+* **readme:** Krizaka footer and dead tour image removed ([#29](https://github.com/krizaka/krizaka-platform-kit/issues/29)) ([4f4cc35](https://github.com/krizaka/krizaka-platform-kit/commit/4f4cc3507975b678e1097239a6541110d4bd3973))
+* **readme:** OpenSSF Scorecard badge ([#22](https://github.com/krizaka/krizaka-platform-kit/issues/22)) ([9df0f4d](https://github.com/krizaka/krizaka-platform-kit/commit/9df0f4da871c2ce3f88df4068074eb8a67e2a8fd))
+* **readme:** the new Krizaka mark, light and dark, from the organisation profile ([#9](https://github.com/krizaka/krizaka-platform-kit/issues/9)) ([b353f8e](https://github.com/krizaka/krizaka-platform-kit/commit/b353f8e115d301d03f6c20c11aa609dc57179734))
+
 ## [0.2.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.1.0...v0.2.0) (2026-10-10)
 
 
