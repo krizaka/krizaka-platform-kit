@@ -76,7 +76,7 @@ public final class JdbcAppConfigStore implements AppConfigStore {
   public AppConfig publish(AppConfig config, String actor, String reason) {
     InMemoryAppConfigStore.requireReason(reason);
     Objects.requireNonNull(actor, "actor");
-    Integer revision =
+    AppConfig published =
         jdbc.queryForObject(
             """
             WITH upsert AS (
@@ -108,9 +108,11 @@ public final class JdbcAppConfigStore implements AppConfigStore {
                   maintenance_on, maintenance_message, message, contract_min, contract_max, contract_sunset,
                   flags, ?, updated_by, updated_at
               FROM upsert)
-            SELECT revision FROM upsert
+            SELECT revision, updated_at FROM upsert
             """,
-            Integer.class,
+            (rs, row) ->
+                config.published(
+                    rs.getInt("revision"), rs.getTimestamp("updated_at").toInstant(), actor),
             config.platform().wire(),
             config.minSupportedVersion().toString(),
             config.latestVersion().toString(),
@@ -125,9 +127,7 @@ public final class JdbcAppConfigStore implements AppConfigStore {
             write(config.flags()),
             actor,
             reason);
-    return find(config.platform())
-        .filter(row -> Objects.equals(row.revision(), revision))
-        .orElseThrow();
+    return published;
   }
 
   @Override
