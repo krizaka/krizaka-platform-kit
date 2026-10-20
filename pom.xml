@@ -161,6 +161,18 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <!-- The recipes come from krizaka-parent; the import layout is stated in rewrite.yml (see there). -->
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <configuration>
+                    <activeStyles>
+                        <style>com.krizaka.style.GoogleJavaImportLayout</style>
+                    </activeStyles>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>

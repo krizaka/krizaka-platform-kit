@@ -38,6 +38,10 @@ The org code rules (addendum 2026-10-15) are checked by tools, not by review.
   anything would (CI runs it: `rewrite: true` in `.github/workflows/ci.yml`); `./mvnw rewrite:run` applies it — behaviour
   identical, run the tests, land it in a small pull request. A recipe that is wrong for this repository is excluded here
   (`<exclusions>` / a `rewrite.yml`), with the reason; test fixtures (`**/fixture/**`) are excluded everywhere.
+  The **import layout is stated, not detected**: `rewrite.yml` declares the google-java-format layout (the one Spotless
+  applies) as style `com.krizaka.style.GoogleJavaImportLayout`, activated in the root `pom.xml`. OpenRewrite's autodetected
+  layout depended on the runner (same commit green on one GitHub runner image, `OrderImports` on 21 files red on the next:
+  issue #22) — never remove it to silence a red check.
 - **ArchUnit** (shared rules in `krizaka-test-support`: `CodeRules`, `ConfigBindingRules`, `SourceRules`,
   `ArchitectureRules`): the governance tests of a module call them. `ArchitectureRules` holds the structure — layers
   (web → service → repository, none skipped, none calling up), no package cycle, `*Controller` / `*Service` /

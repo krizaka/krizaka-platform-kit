@@ -1,0 +1,18 @@
+# The import layout is stated, never detected. Without it OpenRewrite autodetects the layout from the
+# sources, and the result depended on the runner (the order the files are read in): the same commit
+# passed `rewrite:dryRun` on one GitHub runner image and failed on the next (OrderImports on 21 files,
+# krizaka-notifications#22). Spotless formats with google-java-format, so that is the layout: one block,
+# ASCII order, statics first, no star imports.
+---
+type: specs.openrewrite.org/v1beta/style
+name: com.krizaka.style.GoogleJavaImportLayout
+displayName: Krizaka import layout (google-java-format)
+description: Static imports, a blank line, then every other import in one ASCII-ordered block; never a star import.
+styleConfigs:
+  - org.openrewrite.java.style.ImportLayoutStyle:
+      classCountToUseStarImport: 999
+      nameCountToUseStarImport: 999
+      layout:
+        - import static all other imports
+        - <blank line>
+        - import all other imports
