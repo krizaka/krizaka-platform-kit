@@ -8,6 +8,9 @@ Every Krizaka JVM artifact is released at the same version.
 
 ### Added
 
+- Signed webhooks (Standard Webhooks): with `krizaka.notifications.webhook.signing-secret` set, every webhook carries
+  `webhook-id`, `webhook-timestamp` and `webhook-signature: v1,<base64 HMAC-SHA256>` over `id.timestamp.body`
+  (orazaka#189, slice B).
 - Event contracts: `krizaka-notifications-api` publishes the JSON Schema (draft 2020-12) of
   `evt.notification.requested` (`events/evt.notification.requested.v1.json`), checked by
   `NotificationRequestContractTest`; `UserEventsCopyContractTest` checks the service's own copies of

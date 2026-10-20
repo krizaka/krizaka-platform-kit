@@ -40,7 +40,7 @@ class NotificationPropertiesTest {
 
   @Test
   void matchesWebhookHostsCaseInsensitively() {
-    var webhook = new NotificationProperties.Webhook(List.of(" Hooks.Example.com ", ""));
+    var webhook = new NotificationProperties.Webhook(List.of(" Hooks.Example.com ", ""), null);
 
     assertThat(webhook.allows("hooks.example.COM")).isTrue();
     assertThat(webhook.allows("evil.example.com")).isFalse();

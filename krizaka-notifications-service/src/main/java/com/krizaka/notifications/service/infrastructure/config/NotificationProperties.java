@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
 /**
  * Wiring of the notification service ({@code krizaka.notifications}): who the mail is from, where
@@ -32,7 +33,7 @@ public record NotificationProperties(
             : (templateLocation.endsWith("/") ? templateLocation : templateLocation + "/");
     Objects.requireNonNull(links, "krizaka.notifications.links is required");
     twilio = twilio == null ? new Twilio(null, null, null, null) : twilio;
-    webhook = webhook == null ? new Webhook(List.of()) : webhook;
+    webhook = webhook == null ? new Webhook(List.of(), null) : webhook;
   }
 
   /**
@@ -100,9 +101,12 @@ public record NotificationProperties(
    * message, and without the list any producer could make this service call any address.
    *
    * @param allowedHosts host names a webhook may target; empty disables the channel
+   * @param signingSecret when set, every webhook is signed (Standard Webhooks: {@code webhook-id},
+   *     {@code webhook-timestamp}, {@code webhook-signature: v1,<base64 HMAC-SHA256>})
    */
-  public record Webhook(List<String> allowedHosts) {
+  public record Webhook(List<String> allowedHosts, String signingSecret) {
 
+    @ConstructorBinding
     public Webhook {
       allowedHosts =
           allowedHosts == null
@@ -111,11 +115,22 @@ public record NotificationProperties(
                   .filter(host -> host != null && !host.isBlank())
                   .map(host -> host.strip().toLowerCase(Locale.ROOT))
                   .toList();
+      signingSecret = signingSecret == null || signingSecret.isBlank() ? null : signingSecret;
+    }
+
+    /** An unsigned webhook policy (kept for callers of the former single-argument constructor). */
+    public Webhook(List<String> allowedHosts) {
+      this(allowedHosts, null);
     }
 
     /** {@code true} when {@code host} is on the allow-list. */
     public boolean allows(String host) {
       return host != null && allowedHosts.contains(host.toLowerCase(Locale.ROOT));
+    }
+
+    /** {@code true} when webhooks are signed. */
+    public boolean signed() {
+      return signingSecret != null;
     }
   }
 }
