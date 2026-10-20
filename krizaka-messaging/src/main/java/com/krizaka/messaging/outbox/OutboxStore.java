@@ -1,5 +1,6 @@
 package com.krizaka.messaging.outbox;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -69,6 +70,35 @@ public interface OutboxStore {
    * @return the claimed rows, locked until the relay's transaction ends
    */
   List<OutboxMessage> lockPendingBatch(int batchSize);
+
+  /**
+   * Whether this store implements {@link #leaseBatch}. A leasing store lets the relay publish
+   * <i>outside</i> any database transaction; the default {@code false} keeps the older behaviour
+   * (publish inside the transaction that holds {@link #lockPendingBatch}'s row locks).
+   *
+   * @return {@code true} when {@link #leaseBatch} is implemented
+   */
+  default boolean leasesRows() {
+    return false;
+  }
+
+  /**
+   * Claims up to {@code batchSize} due rows, oldest first, for {@code lease}: in this one short
+   * transaction the rows are selected ({@code FOR UPDATE SKIP LOCKED}) and pushed back to {@code
+   * next_attempt_at = now() + lease}, so that no other relay instance picks them up while the first
+   * one publishes — without a lock or a transaction held across the network call. A row whose relay
+   * died before {@link #markPublished} becomes due again when the lease ends and is republished
+   * with the same {@code messageId} (at-least-once).
+   *
+   * <p>Called only when {@link #leasesRows()} is {@code true}.
+   *
+   * @param batchSize the maximum number of rows
+   * @param lease how long the rows stay claimed
+   * @return the claimed rows
+   */
+  default List<OutboxMessage> leaseBatch(int batchSize, Duration lease) {
+    throw new UnsupportedOperationException(getClass().getName() + " does not lease rows");
+  }
 
   /**
    * Records that a row was published.

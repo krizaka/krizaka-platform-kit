@@ -16,10 +16,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * Publishes an {@link OutboxStore}'s pending rows to RabbitMQ, each exactly once per success.
  *
- * <p>One batch runs in one transaction: the rows are claimed, each is published as a persistent
- * JSON message carrying its {@code messageId}, its headers and a timestamp, then marked published —
- * or, when the publish fails, recorded as a failure so the store backs it off. A failure never
- * stops the rest of the batch.
+ * <p>A batch claims its rows, publishes each as a persistent JSON message carrying its {@code
+ * messageId}, its headers and a timestamp, then marks it published — or, when the publish fails,
+ * records a failure so the store backs it off. A failure never stops the rest of the batch.
+ *
+ * <p>With a {@linkplain OutboxStore#leasesRows() leasing} store the claim is a short transaction
+ * and every publish and every mark runs outside one: a slow or stalled broker never holds a
+ * database connection or a row lock. With an older store the whole batch runs in one transaction,
+ * as before.
  *
  * <p>Delivery is at-least-once: a crash between the publish and the commit republishes the row on
  * the next run, with the same {@code messageId}, which consumers deduplicate on ({@link
@@ -37,6 +41,11 @@ public final class OutboxRelay {
   private final int batchSize;
   private final Duration retention;
   private final Clock clock;
+  private final Duration lease;
+
+  // @fixed: how long a claimed row stays invisible to other relays; a safety bound, not a business
+  // rule
+  private static final Duration DEFAULT_LEASE = Duration.ofMinutes(2);
 
   /**
    * A relay over one store.
@@ -55,6 +64,24 @@ public final class OutboxRelay {
       int batchSize,
       Duration retention,
       Clock clock) {
+    this(store, amqp, transactions, batchSize, retention, clock, DEFAULT_LEASE);
+  }
+
+  /**
+   * A relay over one store, with an explicit lease for {@linkplain OutboxStore#leasesRows()
+   * leasing} stores.
+   *
+   * @param lease how long a claimed row stays invisible to other relays (longer than a batch takes)
+   */
+  public OutboxRelay(
+      OutboxStore store,
+      AmqpTemplate amqp,
+      TransactionTemplate transactions,
+      int batchSize,
+      Duration retention,
+      Clock clock,
+      Duration lease) {
+    this.lease = Objects.requireNonNull(lease, "lease");
     this.store = Objects.requireNonNull(store, "store");
     this.amqp = Objects.requireNonNull(amqp, "amqp");
     this.transactions = Objects.requireNonNull(transactions, "transactions");
@@ -72,6 +99,9 @@ public final class OutboxRelay {
    * @return how many rows were published
    */
   public int relayPendingBatch() {
+    if (store.leasesRows()) {
+      return relayLeased();
+    }
     Integer published = transactions.execute(status -> relay(store.lockPendingBatch(batchSize)));
     return published == null ? 0 : published;
   }
@@ -92,6 +122,48 @@ public final class OutboxRelay {
     return count;
   }
 
+  private int relayLeased() {
+    List<OutboxMessage> batch = transactions.execute(status -> store.leaseBatch(batchSize, lease));
+    int published = 0;
+    for (OutboxMessage message : batch == null ? List.<OutboxMessage>of() : batch) {
+      try {
+        amqp.send(message.exchange(), message.routingKey(), toAmqp(message, clock));
+      } catch (RuntimeException e) {
+        logPublishFailure(message, e);
+        inTransaction(
+            () -> store.recordFailure(message.id(), message.attempts()), message, "failure");
+        continue;
+      }
+      published +=
+          inTransaction(() -> store.markPublished(message.id()), message, "published") ? 1 : 0;
+    }
+    return published;
+  }
+
+  /**
+   * A mark that cannot be written leaves the lease to expire: the row is republished, never lost.
+   */
+  private boolean inTransaction(Runnable write, OutboxMessage message, String what) {
+    try {
+      transactions.executeWithoutResult(status -> write.run());
+      return true;
+    } catch (RuntimeException e) {
+      log.warn(
+          "Outbox row {} could not be marked {} — its lease will expire", message.id(), what, e);
+      return false;
+    }
+  }
+
+  private void logPublishFailure(OutboxMessage message, RuntimeException e) {
+    log.warn(
+        "Outbox publish failed for {} ({} -> {}), attempt {} — backing off",
+        message.id(),
+        message.exchange(),
+        message.routingKey(),
+        message.attempts() + 1,
+        e);
+  }
+
   private int relay(List<OutboxMessage> batch) {
     int published = 0;
     for (OutboxMessage message : batch) {
@@ -100,13 +172,7 @@ public final class OutboxRelay {
         store.markPublished(message.id());
         published++;
       } catch (RuntimeException e) {
-        log.warn(
-            "Outbox publish failed for {} ({} -> {}), attempt {} — backing off",
-            message.id(),
-            message.exchange(),
-            message.routingKey(),
-            message.attempts() + 1,
-            e);
+        logPublishFailure(message, e);
         store.recordFailure(message.id(), message.attempts());
       }
     }
