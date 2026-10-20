@@ -48,6 +48,8 @@
         <krizaka.security.amqp-client.version>5.37.0</krizaka.security.amqp-client.version>
         <krizaka.security.opentelemetry.version>1.62.0</krizaka.security.opentelemetry.version>
         <krizaka.security.tomcat.version>11.0.25</krizaka.security.tomcat.version>
+        <!-- Testcontainers 1.x brings commons-compress 1.24, vulnerable until 1.26.0 (OpenSSF Scorecard, Vulnerabilities). -->
+        <krizaka.security.commons-compress.version>1.28.0</krizaka.security.commons-compress.version>
         <!-- The krizaka-build release the kit is built on: krizaka-test-support, at the version of
              the krizaka-parent above. -->
         <krizaka-build.version>0.2.0</krizaka-build.version>
@@ -65,6 +67,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Testcontainers 1.x pulls commons-compress 1.24 (GHSA-4265-ccf5-phj5, GHSA-4g9r-vxhx-9pgx, fixed in 1.26.0). -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${krizaka.security.commons-compress.version}</version>
+            </dependency>
             <!-- Security overrides: these come before the Boot BOM, so they win (first declaration wins). -->
             <dependency>
                 <groupId>tools.jackson</groupId>
