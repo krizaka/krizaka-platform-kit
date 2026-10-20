@@ -10,6 +10,7 @@ import java.time.Clock;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -35,12 +36,25 @@ class WebhookDeliveryAdapter implements DeliveryClient {
 
   @org.springframework.beans.factory.annotation.Autowired
   WebhookDeliveryAdapter(RestClient.Builder builder, NotificationProperties properties) {
-    this(builder, properties, Clock.systemUTC());
+    this(builder, properties, Clock.systemUTC(), DeliveryHttp.timeouts());
   }
 
   WebhookDeliveryAdapter(
       RestClient.Builder builder, NotificationProperties properties, Clock clock) {
-    this.restClient = builder.clone().build();
+    this(builder, properties, clock, null);
+  }
+
+  /** {@code requestFactory} {@code null}: the builder's own (a test binds a mock server to it). */
+  WebhookDeliveryAdapter(
+      RestClient.Builder builder,
+      NotificationProperties properties,
+      Clock clock,
+      ClientHttpRequestFactory requestFactory) {
+    RestClient.Builder client = builder.clone();
+    if (requestFactory != null) {
+      client.requestFactory(requestFactory);
+    }
+    this.restClient = client.build();
     this.webhook = properties.webhook();
     this.clock = clock;
   }

@@ -7,6 +7,7 @@ import com.krizaka.notifications.service.domain.port.DeliveryClient;
 import com.krizaka.notifications.service.infrastructure.config.NotificationProperties;
 import java.util.regex.Pattern;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -26,11 +27,23 @@ class TwilioSmsDeliveryAdapter implements DeliveryClient {
   private final RestClient restClient;
   private final NotificationProperties.Twilio twilio;
 
+  @org.springframework.beans.factory.annotation.Autowired
   TwilioSmsDeliveryAdapter(RestClient.Builder builder, NotificationProperties properties) {
+    this(builder, properties, DeliveryHttp.timeouts());
+  }
+
+  /** {@code requestFactory} {@code null}: the builder's own (a test binds a mock server to it). */
+  TwilioSmsDeliveryAdapter(
+      RestClient.Builder builder,
+      NotificationProperties properties,
+      ClientHttpRequestFactory requestFactory) {
     this.twilio = properties.twilio();
+    RestClient.Builder client = builder.clone();
+    if (requestFactory != null) {
+      client.requestFactory(requestFactory);
+    }
     this.restClient =
-        builder
-            .clone()
+        client
             .baseUrl(twilio.baseUrl())
             .defaultHeaders(
                 headers -> {

@@ -51,7 +51,8 @@ class WebhookDeliveryAdapterTest {
         .andRespond(withSuccess());
 
     WebhookDeliveryAdapter adapter =
-        new WebhookDeliveryAdapter(builder, properties(List.of("hooks.example.com")));
+        new WebhookDeliveryAdapter(
+            builder, properties(List.of("hooks.example.com")), Clock.systemUTC());
     adapter.deliver(to("https://hooks.example.com/notify"));
 
     server.verify();
@@ -106,7 +107,7 @@ class WebhookDeliveryAdapterTest {
                     .isFalse())
         .andRespond(withSuccess());
 
-    new WebhookDeliveryAdapter(builder, properties(List.of("hooks.example.com")))
+    new WebhookDeliveryAdapter(builder, properties(List.of("hooks.example.com")), Clock.systemUTC())
         .deliver(to("https://hooks.example.com/notify"));
 
     server.verify();

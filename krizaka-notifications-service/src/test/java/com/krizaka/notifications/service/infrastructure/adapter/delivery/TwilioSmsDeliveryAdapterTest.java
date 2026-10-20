@@ -45,7 +45,8 @@ class TwilioSmsDeliveryAdapterTest {
                 .formDataContains(java.util.Map.of("To", "+15551234567", "From", "+15550000000")))
         .andRespond(withSuccess());
 
-    TwilioSmsDeliveryAdapter adapter = new TwilioSmsDeliveryAdapter(builder, properties("AC123"));
+    TwilioSmsDeliveryAdapter adapter =
+        new TwilioSmsDeliveryAdapter(builder, properties("AC123"), null);
     adapter.deliver(SMS);
 
     server.verify();
@@ -66,7 +67,8 @@ class TwilioSmsDeliveryAdapterTest {
     server
         .expect(requestTo("https://twilio.test/2010-04-01/Accounts/AC123/Messages.json"))
         .andRespond(withBadRequest());
-    TwilioSmsDeliveryAdapter adapter = new TwilioSmsDeliveryAdapter(builder, properties("AC123"));
+    TwilioSmsDeliveryAdapter adapter =
+        new TwilioSmsDeliveryAdapter(builder, properties("AC123"), null);
 
     assertThatThrownBy(() -> adapter.deliver(new Notification(Channel.SMS, "0555", "otp", "", "x")))
         .isInstanceOf(DeliveryException.class);
