@@ -47,7 +47,9 @@ public final class OutboxRelayScheduler implements SmartLifecycle {
       return;
     }
     executor =
-        Executors.newSingleThreadScheduledExecutor(
+        // Two threads: a long purge never delays the relay of pending rows.
+        Executors.newScheduledThreadPool(
+            2,
             runnable -> {
               Thread thread = new Thread(runnable, "krizaka-outbox-relay");
               thread.setDaemon(true);

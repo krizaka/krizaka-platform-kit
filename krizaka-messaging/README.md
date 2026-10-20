@@ -186,3 +186,11 @@ CREATE TABLE processed_messages (
 `AbstractContainerIntegrationTest`): publish → outbox → relay → listener with the five headers; a rolled-back
 transaction publishes nothing; a listener failing twice is retried with back-off; a listener that always fails ends in
 `<queue>.dlq` with its envelope; a replayed `messageId` is refused by the JDBC deduplication.
+
+### Leasing stores: publish outside the transaction
+
+A store may also implement `leasesRows()` (return `true`) and `leaseBatch(batchSize, lease)`: in one short
+transaction it selects the due rows `FOR UPDATE SKIP LOCKED` and pushes their `next_attempt_at` to
+`now() + lease`. The relay then publishes and marks each row **outside** any transaction, so a slow broker never
+holds a connection or a row lock; a relay that dies leaves the lease to expire and the row is republished with the
+same `messageId` (at-least-once, as before). Stores that do not implement it behave as before.
