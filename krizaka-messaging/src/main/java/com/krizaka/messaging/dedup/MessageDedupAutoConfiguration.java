@@ -1,5 +1,6 @@
 package com.krizaka.messaging.dedup;
 
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -34,13 +35,14 @@ public class MessageDedupAutoConfiguration {
   /**
    * Claims held in memory ({@code store=memory}).
    *
+   * @param observations where {@code processOnce} is observed, when Micrometer is configured
    * @return the in-memory deduplication service
    */
   @Bean
   @ConditionalOnMissingBean(MessageDedup.class)
   @ConditionalOnProperty(prefix = "krizaka.messaging.dedup", name = "store", havingValue = "memory")
-  public MessageDedup inMemoryMessageDedup() {
-    return new InMemoryMessageDedup();
+  public MessageDedup inMemoryMessageDedup(ObjectProvider<ObservationRegistry> observations) {
+    return ObservedMessageDedup.of(new InMemoryMessageDedup(), observations.getIfAvailable());
   }
 
   /** Claims stored in the application's database ({@code store=jdbc}). */
@@ -54,19 +56,23 @@ public class MessageDedupAutoConfiguration {
      *
      * @param properties the claims table
      * @param jdbcTemplate the database
+     * @param observations where {@code processOnce} is observed, when Micrometer is configured
      * @return the JDBC deduplication service
      */
     @Bean
     @ConditionalOnMissingBean(MessageDedup.class)
     MessageDedup jdbcMessageDedup(
-        MessageDedupProperties properties, ObjectProvider<JdbcTemplate> jdbcTemplate) {
+        MessageDedupProperties properties,
+        ObjectProvider<JdbcTemplate> jdbcTemplate,
+        ObjectProvider<ObservationRegistry> observations) {
       JdbcTemplate jdbc = jdbcTemplate.getIfAvailable();
       if (jdbc == null) {
         throw new IllegalStateException(
             "krizaka.messaging.dedup.store=jdbc needs a JdbcTemplate (spring-boot-starter-jdbc"
                 + " and a DataSource)");
       }
-      return new JdbcMessageDedup(jdbc, properties.table());
+      return ObservedMessageDedup.of(
+          new JdbcMessageDedup(jdbc, properties.table()), observations.getIfAvailable());
     }
   }
 

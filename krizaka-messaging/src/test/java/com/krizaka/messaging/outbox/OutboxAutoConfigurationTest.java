@@ -68,6 +68,32 @@ class OutboxAutoConfigurationTest {
   }
 
   @Test
+  void theOutboxHealthIndicatorIsContributedAndCanBeTurnedOff() {
+    runner
+        .withBean(OutboxStore.class, InMemoryOutboxStore::new)
+        .withBean(AmqpTemplate.class, () -> mock(AmqpTemplate.class))
+        .withBean(PlatformTransactionManager.class, () -> mock(PlatformTransactionManager.class))
+        .run(context -> assertThat(context).hasBean("outboxHealthIndicator"));
+    runner
+        .withPropertyValues("management.health.outbox.enabled=false")
+        .run(context -> assertThat(context).doesNotHaveBean("outboxHealthIndicator"));
+  }
+
+  @Test
+  void withoutActuatorHealthThereIsNoIndicatorAndTheRelayStillRuns() {
+    runner
+        .withClassLoader(new FilteredClassLoader("org.springframework.boot.health"))
+        .withBean(OutboxStore.class, InMemoryOutboxStore::new)
+        .withBean(AmqpTemplate.class, () -> mock(AmqpTemplate.class))
+        .withBean(PlatformTransactionManager.class, () -> mock(PlatformTransactionManager.class))
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed().doesNotHaveBean("outboxHealthIndicator");
+              assertThat(context.getBean(OutboxRelayScheduler.class).isRunning()).isTrue();
+            });
+  }
+
+  @Test
   void canBeTurnedOff() {
     runner
         .withPropertyValues("krizaka.messaging.outbox.enabled=false")

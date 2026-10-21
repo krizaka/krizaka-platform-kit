@@ -246,6 +246,19 @@ missing. Every meter is tagged `product`, `service`, `version`. At the lowest pr
 `management.tracing.sampling.probability=0.1`. The OTLP exporter sends spans once
 `management.opentelemetry.tracing.export.otlp.endpoint` (Spring Boot 4) is set.
 
+### What the kit reports
+
+| Where | Name | What |
+|:---|:---|:---|
+| `/actuator/health` | `outbox` | one entry per relayed store: last success, consecutive failures; **DOWN** at `krizaka.messaging.outbox.failure-threshold` (10) failures in a row. `management.health.outbox.enabled=false` turns it off |
+| `/actuator/info` | `krizaka` | `product`, `service`, `version` — the names the meters are tagged with |
+| observation (timer + span) | `krizaka.outbox.relay` | one batch, tagged `krizaka.outbox.store` |
+| observation (timer + span) | `krizaka.outbox.publish` | one publish, tagged with the exchange and the routing key; a failure is the observation's error |
+| observation (timer + span) | `krizaka.messaging.dedup` | one `processOnce`, tagged `krizaka.consumer` and `outcome` = `processed` · `duplicate` · `failed` |
+
+With `spring-boot-starter-actuator` (the observability starter brings it) every observation is a Micrometer timer —
+`krizaka_outbox_publish_seconds_count{error="none"}` in Prometheus — and, with tracing, a span.
+
 ## Configuration reference
 
 Every `krizaka.*` property is in the metadata Spring Boot's configuration processor generates, with its description and

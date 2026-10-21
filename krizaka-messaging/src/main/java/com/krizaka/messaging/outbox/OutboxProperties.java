@@ -19,6 +19,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param retention How long published rows are kept before the purge deletes them.
  * @param lease How long a row claimed by a leasing store stays invisible to the other relays. Keep
  *     it longer than a batch takes to publish, or two relays publish the same row.
+ * @param failureThreshold Consecutive failures (batches that threw, publishes that failed) after
+ *     which the outbox health indicator reports DOWN; reset by the next success.
  */
 @ConfigurationProperties(prefix = "krizaka.messaging.outbox")
 public record OutboxProperties(
@@ -27,7 +29,8 @@ public record OutboxProperties(
     @DefaultValue("100") Integer batchSize,
     @DefaultValue("1h") Duration purgeInterval,
     @DefaultValue("7d") Duration retention,
-    @DefaultValue("2m") Duration lease) {
+    @DefaultValue("2m") Duration lease,
+    @DefaultValue("10") Integer failureThreshold) {
 
   /** Applies the defaults and refuses non-positive values. */
   @ConstructorBinding
@@ -38,6 +41,11 @@ public record OutboxProperties(
     purgeInterval = purgeInterval == null ? Duration.ofHours(1) : purgeInterval;
     retention = retention == null ? Duration.ofDays(7) : retention;
     lease = lease == null ? Duration.ofMinutes(2) : lease;
+    failureThreshold = failureThreshold == null ? 10 : failureThreshold;
+    if (failureThreshold < 1) {
+      throw new IllegalArgumentException(
+          "krizaka.messaging.outbox.failure-threshold must be at least 1");
+    }
     if (!isPositive(pollInterval)
         || !isPositive(purgeInterval)
         || !isPositive(retention)
@@ -64,7 +72,7 @@ public record OutboxProperties(
       Integer batchSize,
       Duration purgeInterval,
       Duration retention) {
-    this(enabled, pollInterval, batchSize, purgeInterval, retention, null);
+    this(enabled, pollInterval, batchSize, purgeInterval, retention, null, null);
   }
 
   private static boolean isPositive(Duration duration) {

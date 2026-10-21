@@ -93,4 +93,36 @@ class KrizakaObservabilityAutoConfigurationTest {
         .withClassLoader(new FilteredClassLoader(MeterRegistry.class))
         .run(context -> assertThat(context).hasFailed());
   }
+
+  @Test
+  void theNamesAreInActuatorInfo() {
+    runner
+        .withPropertyValues(NAMES)
+        .run(
+            context -> {
+              org.springframework.boot.actuate.info.Info.Builder info =
+                  new org.springframework.boot.actuate.info.Info.Builder();
+              context
+                  .getBean(
+                      "krizakaInfoContributor",
+                      org.springframework.boot.actuate.info.InfoContributor.class)
+                  .contribute(info);
+              assertThat(info.build().getDetails())
+                  .containsEntry(
+                      "krizaka",
+                      java.util.Map.of("product", "acme", "service", "orders", "version", "1.2.3"));
+            });
+  }
+
+  @Test
+  void withoutActuatorThereIsNoInfoContributor() {
+    runner
+        .withPropertyValues(NAMES)
+        .withClassLoader(
+            new org.springframework.boot.test.context.FilteredClassLoader(
+                "org.springframework.boot.actuate"))
+        .run(
+            context ->
+                assertThat(context).hasNotFailed().doesNotHaveBean("krizakaInfoContributor"));
+  }
 }

@@ -84,6 +84,15 @@ public final class OutboxRelayScheduler implements SmartLifecycle {
     executor = null;
   }
 
+  /**
+   * How each relay is doing.
+   *
+   * @return one status per relayed store, in declaration order
+   */
+  public List<OutboxRelay.Status> statuses() {
+    return relays.stream().map(OutboxRelay::status).toList();
+  }
+
   @Override
   public synchronized boolean isRunning() {
     return executor != null;

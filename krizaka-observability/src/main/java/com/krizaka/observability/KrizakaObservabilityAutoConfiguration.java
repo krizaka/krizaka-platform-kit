@@ -1,6 +1,9 @@
 package com.krizaka.observability;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -60,6 +63,30 @@ public class KrizakaObservabilityAutoConfiguration {
                   properties.service(),
                   VERSION_TAG,
                   properties.version());
+    }
+  }
+
+  /** The service's names in {@code /actuator/info}, where Actuator is present. */
+  @Configuration(proxyBeanMethods = false)
+  @ConditionalOnClass(name = "org.springframework.boot.actuate.info.InfoContributor")
+  public static class Info {
+    /** Creates the configuration; Spring instantiates it. */
+    public Info() {}
+
+    /**
+     * Adds {@code krizaka: { product, service, version }} to {@code /actuator/info}: the same names
+     * the meters are tagged with, so a dashboard and a probe agree on what is running.
+     *
+     * @param properties the service's names
+     * @return the contributor
+     */
+    @Bean
+    public InfoContributor krizakaInfoContributor(KrizakaObservabilityProperties properties) {
+      Map<String, Object> names = new LinkedHashMap<>();
+      names.put(PRODUCT_TAG, properties.product());
+      names.put(SERVICE_TAG, properties.service());
+      names.put(VERSION_TAG, properties.version());
+      return info -> info.withDetail("krizaka", new LinkedHashMap<>(names));
     }
   }
 }

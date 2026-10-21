@@ -1,10 +1,15 @@
 package com.krizaka.messaging.outbox;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -30,6 +35,10 @@ import org.springframework.transaction.support.TransactionTemplate;
  * com.krizaka.messaging.dedup.MessageDedup}).
  *
  * <p>Usually scheduled by the auto-configuration; it can also be driven by hand.
+ *
+ * <p>Observed: each batch is a {@value #RELAY_OBSERVATION} observation and each publish a {@value
+ * #PUBLISH_OBSERVATION} one (a timer and a span each, with Spring Boot's Micrometer support), and
+ * {@link #status()} tells the {@code outbox} health indicator how the relay is doing.
  */
 public final class OutboxRelay {
 
@@ -42,6 +51,16 @@ public final class OutboxRelay {
   private final Duration retention;
   private final Clock clock;
   private final Duration lease;
+  private final ObservationRegistry observations;
+  private final AtomicReference<Instant> lastSuccess = new AtomicReference<>();
+  private final AtomicInteger consecutiveFailures = new AtomicInteger();
+  private final AtomicReference<String> lastError = new AtomicReference<>();
+
+  /** The observation of one batch: a timer and a span, tagged with the store. */
+  public static final String RELAY_OBSERVATION = "krizaka.outbox.relay";
+
+  /** The observation of one publish: a timer and a span, tagged with the exchange and the key. */
+  public static final String PUBLISH_OBSERVATION = "krizaka.outbox.publish";
 
   // @fixed: how long a claimed row stays invisible to other relays; a safety bound, not a business
   // rule
@@ -81,6 +100,32 @@ public final class OutboxRelay {
       Duration retention,
       Clock clock,
       Duration lease) {
+    this(store, amqp, transactions, batchSize, retention, clock, lease, ObservationRegistry.NOOP);
+  }
+
+  /**
+   * A relay over one store, observed.
+   *
+   * @param store the outbox table's owner
+   * @param amqp where rows are published
+   * @param transactions the transaction each batch runs in
+   * @param batchSize the most rows published per batch
+   * @param retention how long published rows are kept before {@link #purgePublished} deletes them
+   * @param clock the source of the purge cutoff and of the status times
+   * @param lease how long a claimed row stays invisible to other relays (leasing stores)
+   * @param observations where batches and publishes are observed; {@link ObservationRegistry#NOOP}
+   *     to observe nothing
+   */
+  public OutboxRelay(
+      OutboxStore store,
+      AmqpTemplate amqp,
+      TransactionTemplate transactions,
+      int batchSize,
+      Duration retention,
+      Clock clock,
+      Duration lease,
+      ObservationRegistry observations) {
+    this.observations = Objects.requireNonNull(observations, "observations");
     this.lease = Objects.requireNonNull(lease, "lease");
     this.store = Objects.requireNonNull(store, "store");
     this.amqp = Objects.requireNonNull(amqp, "amqp");
@@ -99,11 +144,75 @@ public final class OutboxRelay {
    * @return how many rows were published
    */
   public int relayPendingBatch() {
-    if (store.leasesRows()) {
-      return relayLeased();
+    Observation batch =
+        Observation.createNotStarted(RELAY_OBSERVATION, observations)
+            .lowCardinalityKeyValue("krizaka.outbox.store", storeName())
+            .start();
+    try (Observation.Scope scope = batch.openScope()) {
+      int published;
+      if (store.leasesRows()) {
+        published = relayLeased();
+      } else {
+        Integer count = transactions.execute(status -> relay(store.lockPendingBatch(batchSize)));
+        published = count == null ? 0 : count;
+      }
+      batch.highCardinalityKeyValue("krizaka.outbox.published", Integer.toString(published));
+      return published;
+    } catch (RuntimeException e) {
+      failed(e);
+      batch.error(e);
+      throw e;
+    } finally {
+      batch.stop();
     }
-    Integer published = transactions.execute(status -> relay(store.lockPendingBatch(batchSize)));
-    return published == null ? 0 : published;
+  }
+
+  /**
+   * How the relay is doing, for the {@code outbox} health indicator.
+   *
+   * @return the store, the last time a row was published or a batch found nothing to do, and the
+   *     failures (batches that threw, publishes that failed) since
+   */
+  public Status status() {
+    return new Status(storeName(), lastSuccess.get(), consecutiveFailures.get(), lastError.get());
+  }
+
+  /**
+   * A relay's state.
+   *
+   * @param store the store's simple class name
+   * @param lastSuccess the last time a row was published or a batch completed with nothing to
+   *     publish; {@code null} before the first
+   * @param consecutiveFailures batches that threw and publishes that failed since the last success
+   * @param lastError the type of the last failure, never its message (it may carry data)
+   */
+  public record Status(
+      String store, Instant lastSuccess, int consecutiveFailures, String lastError) {}
+
+  private void succeeded() {
+    lastSuccess.set(clock.instant());
+    consecutiveFailures.set(0);
+  }
+
+  private void failed(RuntimeException e) {
+    consecutiveFailures.incrementAndGet();
+    lastError.set(e.getClass().getName());
+  }
+
+  /** Publishes one row, observed; a failure is recorded and rethrown. */
+  private void publish(OutboxMessage message) {
+    try {
+      Observation.createNotStarted(PUBLISH_OBSERVATION, observations)
+          .lowCardinalityKeyValue("messaging.destination.name", message.exchange())
+          .lowCardinalityKeyValue(
+              "messaging.rabbitmq.destination.routing_key", message.routingKey())
+          .observe(
+              () -> amqp.send(message.exchange(), message.routingKey(), toAmqp(message, clock)));
+    } catch (RuntimeException e) {
+      failed(e);
+      throw e;
+    }
+    succeeded();
   }
 
   /**
@@ -124,10 +233,14 @@ public final class OutboxRelay {
 
   private int relayLeased() {
     List<OutboxMessage> batch = transactions.execute(status -> store.leaseBatch(batchSize, lease));
+    if (batch == null || batch.isEmpty()) {
+      succeeded();
+      return 0;
+    }
     int published = 0;
-    for (OutboxMessage message : batch == null ? List.<OutboxMessage>of() : batch) {
+    for (OutboxMessage message : batch) {
       try {
-        amqp.send(message.exchange(), message.routingKey(), toAmqp(message, clock));
+        publish(message);
       } catch (RuntimeException e) {
         logPublishFailure(message, e);
         inTransaction(
@@ -165,10 +278,14 @@ public final class OutboxRelay {
   }
 
   private int relay(List<OutboxMessage> batch) {
+    if (batch.isEmpty()) {
+      succeeded();
+      return 0;
+    }
     int published = 0;
     for (OutboxMessage message : batch) {
       try {
-        amqp.send(message.exchange(), message.routingKey(), toAmqp(message, clock));
+        publish(message);
         store.markPublished(message.id());
         published++;
       } catch (RuntimeException e) {
