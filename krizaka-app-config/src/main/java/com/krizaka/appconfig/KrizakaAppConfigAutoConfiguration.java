@@ -158,6 +158,22 @@ public class KrizakaAppConfigAutoConfiguration {
     return registration;
   }
 
+  /** The {@code appConfig} health component, where Actuator's health support is present. */
+  @Configuration(proxyBeanMethods = false)
+  @ConditionalOnClass(name = "org.springframework.boot.health.contributor.HealthIndicator")
+  @ConditionalOnProperty(
+      prefix = "management.health.app-config",
+      name = "enabled",
+      havingValue = "true",
+      matchIfMissing = true)
+  static class Health {
+    @Bean
+    @ConditionalOnMissingBean(name = "appConfigHealthIndicator")
+    AppConfigHealthIndicator appConfigHealthIndicator(AppConfigStore store) {
+      return new AppConfigHealthIndicator(store);
+    }
+  }
+
   /** The admin API, only when declared. */
   @Configuration(proxyBeanMethods = false)
   @ConditionalOnProperty(

@@ -81,6 +81,11 @@ public final class ObservedMessageDedup implements MessageDedup {
   }
 
   @Override
+  public void verify() {
+    delegate.verify();
+  }
+
+  @Override
   public long purgeClaimedBefore(Instant cutoff) {
     return delegate.purgeClaimedBefore(cutoff);
   }

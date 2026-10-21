@@ -37,6 +37,12 @@
             <artifactId>spring-jdbc</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Optional: the appConfig health indicator, contributed only where Actuator's health support is present. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-health</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>

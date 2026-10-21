@@ -94,4 +94,12 @@ public interface MessageDedup {
    * @return how many claims were forgotten
    */
   long purgeClaimedBefore(Instant cutoff);
+
+  /**
+   * Checks that the store can claim: for a database store, that its table answers. The {@code
+   * dedup} health indicator calls it.
+   *
+   * @throws RuntimeException when the store cannot claim
+   */
+  default void verify() {}
 }
