@@ -74,6 +74,11 @@
       "description" : "Whether a relay is scheduled for each OutboxStore bean.",
       "defaultValue" : true
     }, {
+      "name" : "krizaka.messaging.outbox.failure-threshold",
+      "type" : "java.lang.Integer",
+      "description" : "Consecutive failures (batches that threw, publishes that failed) after which the outbox health indicator reports DOWN; reset by the next success.",
+      "defaultValue" : 10
+    }, {
       "name" : "krizaka.messaging.outbox.lease",
       "type" : "java.time.Duration",
       "description" : "How long a row claimed by a leasing store stays invisible to the other relays. Keep it longer than a batch takes to publish, or two relays publish the same row.",

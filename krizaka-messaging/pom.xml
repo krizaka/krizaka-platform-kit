@@ -44,6 +44,12 @@
             <artifactId>spring-boot-amqp</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Optional: the outbox health indicator, contributed only where Actuator's health support is present. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-health</artifactId>
+            <optional>true</optional>
+        </dependency>
         <!-- Optional: events and consumed messages are JSON written by the application's own
              Jackson 3 JsonMapper — the kit never brings a mapper of its own. -->
         <dependency>
