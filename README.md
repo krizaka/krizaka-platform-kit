@@ -40,6 +40,7 @@ tested.
 | [`krizaka-web`](krizaka-web) | `com.krizaka:krizaka-web` | **RFC 9457 Problem Details** with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
 | [`krizaka-observability`](krizaka-observability) | `com.krizaka:krizaka-observability` | **Required service names** (product, service, version) as common metric tags, ECS JSON logs, health/info/prometheus exposed, 10 % trace sampling — defaults at the lowest priority |
 | [`krizaka-idempotency`](krizaka-idempotency) | `com.krizaka:krizaka-idempotency` | **HTTP `Idempotency-Key`**: an action runs at most once per key, a retry replays its response (`Idempotent-Replayed: true`), the same key for another request is a `422`; PostgreSQL store in the action's transaction — promoted from Orazaka |
+| [`krizaka-webhooks`](krizaka-webhooks) | `com.krizaka:krizaka-webhooks` | **Signed webhooks, the Standard Webhooks way**: `WebhookSender` signs and sends (stable `webhook-id`, secret rotation), `WebhookVerifier` checks signature (constant time) and timestamp tolerance and answers `401 invalid-webhook`; observed — promoted from Orazaka #189 |
 | [`krizaka-persistence`](krizaka-persistence) | `com.krizaka:krizaka-persistence` | **The kit's tables migrated at startup**: Flyway runs the schemas the modules ship, only for the JDBC stores a service declares, in their own history table; production pool defaults |
 | [`krizaka-app-config`](krizaka-app-config) | `com.krizaka:krizaka-app-config` | **App version compatibility**: a public cached `GET /api/v1/app-config` (minimum and latest version, update mode, maintenance, contract range, store URL, flags, localized message) read from database parameters, **`426 Upgrade Required`** below the minimum, N-1 contract compatibility with `Deprecation`/`Sunset`, an audited admin API with rollback |
 
@@ -57,6 +58,7 @@ capabilities, never the Spring list behind them; a Spring Boot upgrade changes t
 | `com.krizaka:krizaka-spring-boot-starter-rabbitmq` | `krizaka-messaging` + `spring-boot-starter-amqp` + `-jdbc` + `-jackson` (add your JDBC driver) |
 | `com.krizaka:krizaka-spring-boot-starter-observability` | `krizaka-observability` + `spring-boot-starter-actuator` + OpenTelemetry tracing (`spring-boot-micrometer-tracing-opentelemetry`, `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`) + `micrometer-registry-prometheus` |
 | `com.krizaka:krizaka-spring-boot-starter-idempotency` | `krizaka-idempotency` + `krizaka-spring-boot-starter-web` + `spring-boot-starter-jdbc` (add your JDBC driver) |
+| `com.krizaka:krizaka-spring-boot-starter-webhooks` | `krizaka-webhooks` + `krizaka-spring-boot-starter-web` |
 | `com.krizaka:krizaka-spring-boot-starter-persistence` | `krizaka-persistence` + `spring-boot-starter-jdbc` + the PostgreSQL driver |
 | `com.krizaka:krizaka-spring-boot-starter-app-config` | `krizaka-app-config` + `spring-boot-starter-webmvc` + `-jdbc` |
 

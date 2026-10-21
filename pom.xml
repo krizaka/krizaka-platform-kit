@@ -63,9 +63,11 @@
         <module>krizaka-app-config</module>
         <module>krizaka-idempotency</module>
         <module>krizaka-persistence</module>
+        <module>krizaka-webhooks</module>
         <module>starters</module>
         <module>examples/krizaka-starters-example</module>
         <module>examples/krizaka-idempotency-example</module>
+        <module>examples/krizaka-webhooks-example</module>
     </modules>
 
     <dependencyManagement>
@@ -139,6 +141,7 @@
                         <excludeArtifacts>
                             <excludeArtifact>krizaka-starters-example</excludeArtifact>
                             <excludeArtifact>krizaka-idempotency-example</excludeArtifact>
+                            <excludeArtifact>krizaka-webhooks-example</excludeArtifact>
                         </excludeArtifacts>
                     </configuration>
                 </plugin>

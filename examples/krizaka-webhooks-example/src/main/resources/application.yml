@@ -1,0 +1,9 @@
+spring:
+  application.name: krizaka-webhooks-example
+krizaka:
+  webhooks:
+    # What the sender signs with. 'whsec_' + base64 is the standard's form; plain text works too.
+    # A real service reads it from its secret store: this one is for the example only.
+    receiving.secrets: whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw
+    # Sending is optional: this property contributes the WebhookSender.
+    signing.secret: whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw
