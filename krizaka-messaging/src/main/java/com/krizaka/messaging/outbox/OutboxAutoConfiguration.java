@@ -12,8 +12,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Schedules a relay for every {@link OutboxStore} bean the application declares.
@@ -26,7 +28,9 @@ import org.springframework.transaction.support.TransactionTemplate;
     afterName = {
       "org.springframework.boot.amqp.autoconfigure.RabbitAutoConfiguration",
       "org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration",
-      "org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration"
+      "org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration",
+      "org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration",
+      "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration"
     })
 @ConditionalOnClass(AmqpTemplate.class)
 @ConditionalOnProperty(
@@ -34,7 +38,7 @@ import org.springframework.transaction.support.TransactionTemplate;
     name = "enabled",
     havingValue = "true",
     matchIfMissing = true)
-@EnableConfigurationProperties(OutboxProperties.class)
+@EnableConfigurationProperties({OutboxProperties.class, JdbcOutboxProperties.class})
 public class OutboxAutoConfiguration {
 
   /**
@@ -81,6 +85,46 @@ public class OutboxAutoConfiguration {
                         registry))
             .toList();
     return new OutboxRelayScheduler(relays, properties.pollInterval(), properties.purgeInterval());
+  }
+
+  /** The kit's PostgreSQL outbox, when declared ({@code krizaka.messaging.outbox.jdbc.enabled}). */
+  @Configuration(proxyBeanMethods = false)
+  @ConditionalOnClass(
+      name = {
+        "org.springframework.jdbc.core.JdbcTemplate",
+        "tools.jackson.databind.json.JsonMapper"
+      })
+  @ConditionalOnProperty(
+      prefix = "krizaka.messaging.outbox.jdbc",
+      name = "enabled",
+      havingValue = "true")
+  static class Jdbc {
+    /**
+     * The store; it backs off when the application declares its own.
+     *
+     * @param jdbc the application's database
+     * @param json the application's mapper; Jackson's shared default when there is none
+     * @param properties the table and the back-off
+     * @return the store the relay and the EventPublisher use
+     */
+    @Bean
+    @ConditionalOnMissingBean(OutboxStore.class)
+    OutboxStore krizakaJdbcOutboxStore(
+        ObjectProvider<JdbcTemplate> jdbc,
+        ObjectProvider<JsonMapper> json,
+        JdbcOutboxProperties properties) {
+      JdbcTemplate template = jdbc.getIfAvailable();
+      if (template == null) {
+        throw new IllegalStateException(
+            "krizaka.messaging.outbox.jdbc.enabled=true needs a JdbcTemplate"
+                + " (spring-boot-starter-jdbc and a DataSource)");
+      }
+      return new JdbcOutboxStore(
+          template,
+          json.getIfAvailable(JsonMapper::shared),
+          properties.table(),
+          properties.maxBackoff());
+    }
   }
 
   /** The {@code outbox} health component, where Actuator's health support is present. */

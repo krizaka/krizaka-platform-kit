@@ -94,6 +94,45 @@ class OutboxAutoConfigurationTest {
   }
 
   @Test
+  void theKitsJdbcStoreWhenDeclaredAndTheApplicationsOwnOtherwise() {
+    runner
+        .withPropertyValues("krizaka.messaging.outbox.jdbc.enabled=true")
+        .withBean(
+            org.springframework.jdbc.core.JdbcTemplate.class,
+            () -> mock(org.springframework.jdbc.core.JdbcTemplate.class))
+        .withBean(AmqpTemplate.class, () -> mock(AmqpTemplate.class))
+        .withBean(PlatformTransactionManager.class, () -> mock(PlatformTransactionManager.class))
+        .run(
+            context ->
+                assertThat(context.getBean(OutboxStore.class)).isInstanceOf(JdbcOutboxStore.class));
+    runner
+        .withPropertyValues("krizaka.messaging.outbox.jdbc.enabled=true")
+        .withBean(OutboxStore.class, InMemoryOutboxStore::new)
+        .withBean(AmqpTemplate.class, () -> mock(AmqpTemplate.class))
+        .withBean(PlatformTransactionManager.class, () -> mock(PlatformTransactionManager.class))
+        .run(
+            context ->
+                assertThat(context.getBean(OutboxStore.class))
+                    .isInstanceOf(InMemoryOutboxStore.class));
+    runner.run(context -> assertThat(context).doesNotHaveBean(OutboxStore.class));
+  }
+
+  @Test
+  void theKitsJdbcStoreWithoutADatabaseFails() {
+    runner
+        .withPropertyValues("krizaka.messaging.outbox.jdbc.enabled=true")
+        .withBean(AmqpTemplate.class, () -> mock(AmqpTemplate.class))
+        .withBean(PlatformTransactionManager.class, () -> mock(PlatformTransactionManager.class))
+        .run(
+            context ->
+                assertThat(context)
+                    .hasFailed()
+                    .getFailure()
+                    .rootCause()
+                    .hasMessageContaining("needs a JdbcTemplate"));
+  }
+
+  @Test
   void canBeTurnedOff() {
     runner
         .withPropertyValues("krizaka.messaging.outbox.enabled=false")
