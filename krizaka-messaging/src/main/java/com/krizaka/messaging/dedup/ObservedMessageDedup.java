@@ -65,7 +65,7 @@ public final class ObservedMessageDedup implements MessageDedup {
   public boolean processOnce(String consumer, String messageId, Runnable handler) {
     Observation observation =
         Observation.createNotStarted(OBSERVATION, observations)
-            .lowCardinalityKeyValue("krizaka.consumer", String.valueOf(consumer))
+            .lowCardinalityKeyValue("krizaka.consumer", consumer == null ? "none" : consumer)
             .start();
     try (Observation.Scope scope = observation.openScope()) {
       boolean processed = delegate.processOnce(consumer, messageId, handler);
