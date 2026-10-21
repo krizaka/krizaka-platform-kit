@@ -62,6 +62,7 @@
         <module>krizaka-observability</module>
         <module>krizaka-app-config</module>
         <module>krizaka-idempotency</module>
+        <module>krizaka-persistence</module>
         <module>starters</module>
         <module>examples/krizaka-starters-example</module>
         <module>examples/krizaka-idempotency-example</module>

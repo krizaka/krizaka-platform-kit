@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- A starter is a POM, not code: the code is in the module it names. -->
+    <parent>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-spring-boot-starters</artifactId>
+        <version>0.2.0</version>
+    </parent>
+
+    <artifactId>krizaka-spring-boot-starter-persistence</artifactId>
+    <name>Krizaka Spring Boot Starter Persistence</name>
+    <description>The tables of the kit's JDBC stores migrated at startup in one dependency: krizaka-persistence (Flyway, its own history table, only the declared stores, pool defaults) with Spring JDBC and the PostgreSQL driver.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-persistence</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+</project>

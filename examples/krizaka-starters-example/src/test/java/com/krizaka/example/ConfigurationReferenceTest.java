@@ -37,7 +37,8 @@ class ConfigurationReferenceTest {
           "krizaka-observability",
           "krizaka-messaging",
           "krizaka-app-config",
-          "krizaka-idempotency");
+          "krizaka-idempotency",
+          "krizaka-persistence");
 
   /**
    * The properties that have no default, on purpose: a value only the service can give (its secret,

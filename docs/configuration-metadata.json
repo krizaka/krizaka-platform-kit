@@ -248,5 +248,19 @@
         "description" : "Keys in this instance's memory: tests, demos, a single instance."
       } ]
     } ]
+  }, {
+    "artifact" : "krizaka-persistence",
+    "properties" : [ {
+      "name" : "krizaka.persistence.migrations.enabled",
+      "type" : "java.lang.Boolean",
+      "description" : "Whether the tables of the declared JDBC stores are created and migrated at startup. Turn it off when an operator runs the shipped schemas.",
+      "defaultValue" : true
+    }, {
+      "name" : "krizaka.persistence.migrations.history-table",
+      "type" : "java.lang.String",
+      "description" : "Flyway history table of the kit's migrations, kept apart from the service's own so their versions never meet.",
+      "defaultValue" : "krizaka_schema_history"
+    } ],
+    "hints" : [ ]
   } ]
 }

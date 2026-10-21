@@ -40,6 +40,7 @@ tested.
 | [`krizaka-web`](krizaka-web) | `com.krizaka:krizaka-web` | **RFC 9457 Problem Details** with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
 | [`krizaka-observability`](krizaka-observability) | `com.krizaka:krizaka-observability` | **Required service names** (product, service, version) as common metric tags, ECS JSON logs, health/info/prometheus exposed, 10 % trace sampling — defaults at the lowest priority |
 | [`krizaka-idempotency`](krizaka-idempotency) | `com.krizaka:krizaka-idempotency` | **HTTP `Idempotency-Key`**: an action runs at most once per key, a retry replays its response (`Idempotent-Replayed: true`), the same key for another request is a `422`; PostgreSQL store in the action's transaction — promoted from Orazaka |
+| [`krizaka-persistence`](krizaka-persistence) | `com.krizaka:krizaka-persistence` | **The kit's tables migrated at startup**: Flyway runs the schemas the modules ship, only for the JDBC stores a service declares, in their own history table; production pool defaults |
 | [`krizaka-app-config`](krizaka-app-config) | `com.krizaka:krizaka-app-config` | **App version compatibility**: a public cached `GET /api/v1/app-config` (minimum and latest version, update mode, maintenance, contract range, store URL, flags, localized message) read from database parameters, **`426 Upgrade Required`** below the minimum, N-1 contract compatibility with `Deprecation`/`Sunset`, an audited admin API with rollback |
 
 Requires Java 21 and Spring Boot 4.0.
@@ -56,6 +57,7 @@ capabilities, never the Spring list behind them; a Spring Boot upgrade changes t
 | `com.krizaka:krizaka-spring-boot-starter-rabbitmq` | `krizaka-messaging` + `spring-boot-starter-amqp` + `-jdbc` + `-jackson` (add your JDBC driver) |
 | `com.krizaka:krizaka-spring-boot-starter-observability` | `krizaka-observability` + `spring-boot-starter-actuator` + OpenTelemetry tracing (`spring-boot-micrometer-tracing-opentelemetry`, `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`) + `micrometer-registry-prometheus` |
 | `com.krizaka:krizaka-spring-boot-starter-idempotency` | `krizaka-idempotency` + `krizaka-spring-boot-starter-web` + `spring-boot-starter-jdbc` (add your JDBC driver) |
+| `com.krizaka:krizaka-spring-boot-starter-persistence` | `krizaka-persistence` + `spring-boot-starter-jdbc` + the PostgreSQL driver |
 | `com.krizaka:krizaka-spring-boot-starter-app-config` | `krizaka-app-config` + `spring-boot-starter-webmvc` + `-jdbc` |
 
 The whole configuration of a service on the four starters — everything else is a kit default you can override
@@ -253,7 +255,24 @@ key's primary key — the second waits, then replays. Keys live `krizaka.idempot
 PostgreSQL by `JdbcIdempotencyIT` and, over HTTP, by [`examples/krizaka-idempotency-example`](examples/krizaka-idempotency-example).
 Promoted from Orazaka's run starts (ADR-083).
 
-## krizaka-app-config
+## krizaka-persistence
+
+Add `krizaka-spring-boot-starter-persistence` and the tables of the stores you declared exist when the context has
+started — no `infra/initdb` script, no copied DDL:
+
+| Declared | Table (renamed by its property) | Version |
+|:---|:---|:---|
+| `krizaka.messaging.outbox.jdbc.enabled=true` | `krizaka_outbox` (`…outbox.jdbc.table`) | 1.1 |
+| `krizaka.messaging.dedup.store=jdbc` | `processed_messages` (`…dedup.table`) | 1.2 |
+| `krizaka-app-config` on the classpath, store `jdbc` | `app_config`, `app_config_history` | 2.1 |
+| `krizaka.idempotency.store=jdbc` | `idempotency_keys` (`…idempotency.table`) | 3.1 |
+
+Flyway runs **the schema each module ships** (never a copy), in its own history table `krizaka_schema_history`, so the
+kit's versions never meet your `db/migration`; a store added later is migrated out of order; tables an operator already
+created are adopted (`IF NOT EXISTS`, baseline). Renaming a table after it was created fails Flyway's validation instead
+of creating a second one. `krizaka.persistence.migrations.enabled=false` leaves it all to an operator. At the lowest
+priority it also sets `spring.datasource.hikari.leak-detection-threshold=20000` and `connection-timeout=10000`.
+
 
 A mobile or desktop app outlives the API it calls. The app sends `X-Client-Platform`, `X-Client-Version` and
 `X-Contract-Version`; the service answers `426 Upgrade Required` (Problem Details carrying the `appConfig` payload) below
