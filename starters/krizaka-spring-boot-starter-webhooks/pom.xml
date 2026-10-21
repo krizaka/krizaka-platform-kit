@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- A starter is a POM, not code: the code is in the module it names. -->
+    <parent>
+        <groupId>com.krizaka</groupId>
+        <artifactId>krizaka-spring-boot-starters</artifactId>
+        <version>0.2.0</version>
+    </parent>
+
+    <artifactId>krizaka-spring-boot-starter-webhooks</artifactId>
+    <name>Krizaka Spring Boot Starter Webhooks</name>
+    <description>Signed webhooks in one dependency: krizaka-webhooks (Standard Webhooks signing and sending, verification with a 401 Problem Details, secret rotation) with Spring MVC.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-webhooks</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.krizaka</groupId>
+            <artifactId>krizaka-spring-boot-starter-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

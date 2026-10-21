@@ -19,7 +19,7 @@
     <artifactId>krizaka-spring-boot-starters</artifactId>
     <packaging>pom</packaging>
     <name>Krizaka Spring Boot Starters</name>
-    <description>Parent of the Krizaka Spring Boot starters: one dependency per capability (web, security, rabbitmq, observability, app-config, idempotency, persistence), each an aggregator of a kit module and the Spring Boot starters it needs.</description>
+    <description>Parent of the Krizaka Spring Boot starters: one dependency per capability (web, security, rabbitmq, observability, app-config, idempotency, persistence, webhooks), each an aggregator of a kit module and the Spring Boot starters it needs.</description>
 
     <modules>
         <module>krizaka-spring-boot-starter-web</module>
@@ -29,6 +29,7 @@
         <module>krizaka-spring-boot-starter-app-config</module>
         <module>krizaka-spring-boot-starter-idempotency</module>
         <module>krizaka-spring-boot-starter-persistence</module>
+        <module>krizaka-spring-boot-starter-webhooks</module>
     </modules>
 
     <dependencies>
