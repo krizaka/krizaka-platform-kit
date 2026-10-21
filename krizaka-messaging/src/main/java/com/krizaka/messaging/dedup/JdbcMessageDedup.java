@@ -39,6 +39,7 @@ public final class JdbcMessageDedup implements MessageDedup {
   private final String insert;
   private final String delete;
   private final String purge;
+  private final String probe;
 
   /**
    * Claims stored in {@value #DEFAULT_TABLE}.
@@ -64,6 +65,13 @@ public final class JdbcMessageDedup implements MessageDedup {
     this.insert = "INSERT INTO " + table + " (consumer, message_id) VALUES (?, ?)";
     this.delete = "DELETE FROM " + table + " WHERE consumer = ? AND message_id = ?";
     this.purge = "DELETE FROM " + table + " WHERE processed_at < ?";
+    this.probe = "SELECT 1 FROM " + table + " WHERE 1 = 0";
+  }
+
+  /** Reads the claims table without touching a row: the database answers and the table exists. */
+  @Override
+  public void verify() {
+    jdbcTemplate.queryForList(probe);
   }
 
   @Override

@@ -76,6 +76,23 @@ public class MessageDedupAutoConfiguration {
     }
   }
 
+  /** The {@code dedup} health component, where Actuator's health support is present. */
+  @Configuration(proxyBeanMethods = false)
+  @ConditionalOnClass(name = "org.springframework.boot.health.contributor.HealthIndicator")
+  @ConditionalOnProperty(
+      prefix = "management.health.dedup",
+      name = "enabled",
+      havingValue = "true",
+      matchIfMissing = true)
+  static class Health {
+    /** Every declared store has a MessageDedup bean (the class is conditional on the store). */
+    @Bean
+    @ConditionalOnMissingBean(name = "dedupHealthIndicator")
+    MessageDedupHealthIndicator dedupHealthIndicator(MessageDedup dedup) {
+      return new MessageDedupHealthIndicator(dedup);
+    }
+  }
+
   /** {@code store=jdbc} with no JDBC on the classpath: refuse to start, with the reason. */
   @Configuration(proxyBeanMethods = false)
   @ConditionalOnMissingClass(JDBC_TEMPLATE)

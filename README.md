@@ -281,6 +281,8 @@ missing. Every meter is tagged `product`, `service`, `version`. At the lowest pr
 | Where | Name | What |
 |:---|:---|:---|
 | `/actuator/health` | `outbox` | one entry per relayed store: last success, consecutive failures; **DOWN** at `krizaka.messaging.outbox.failure-threshold` (10) failures in a row. `management.health.outbox.enabled=false` turns it off |
+| `/actuator/health` | `dedup` | the claim store can claim (its table answers); **DOWN** otherwise — listeners would dead-letter. `management.health.dedup.enabled=false` |
+| `/actuator/health` | `appConfig` | the app-config store answers (read directly, not from the cache), with the platforms configured and those in maintenance. `management.health.app-config.enabled=false` |
 | `/actuator/info` | `krizaka` | `product`, `service`, `version` — the names the meters are tagged with |
 | observation (timer + span) | `krizaka.outbox.relay` | one batch, tagged `krizaka.outbox.store` |
 | observation (timer + span) | `krizaka.outbox.publish` | one publish, tagged with the exchange and the routing key; a failure is the observation's error |
