@@ -1,0 +1,11 @@
+{
+  "hints": [
+    {
+      "name": "krizaka.idempotency.store",
+      "values": [
+        { "value": "jdbc", "description": "Keys in the application's PostgreSQL database, in the action's transaction, shared by every instance." },
+        { "value": "memory", "description": "Keys in this instance's memory: tests, demos, a single instance." }
+      ]
+    }
+  ]
+}

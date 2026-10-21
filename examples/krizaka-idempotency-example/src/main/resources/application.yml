@@ -1,0 +1,7 @@
+spring:
+  application.name: krizaka-idempotency-example
+  sql.init:
+    mode: always
+    schema-locations: classpath:com/krizaka/idempotency/schema-postgresql.sql, classpath:schema.sql
+krizaka:
+  idempotency.store: jdbc

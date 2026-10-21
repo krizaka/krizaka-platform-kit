@@ -36,7 +36,8 @@ class ConfigurationReferenceTest {
           "krizaka-security",
           "krizaka-observability",
           "krizaka-messaging",
-          "krizaka-app-config");
+          "krizaka-app-config",
+          "krizaka-idempotency");
 
   /**
    * The properties that have no default, on purpose: a value only the service can give (its secret,
@@ -50,6 +51,7 @@ class ConfigurationReferenceTest {
           "krizaka.observability.version",
           "krizaka.messaging.producer",
           "krizaka.messaging.dedup.store",
+          "krizaka.idempotency.store",
           "krizaka.web.cors.allowed-origins");
 
   static final Path ROOT = Path.of("../..");

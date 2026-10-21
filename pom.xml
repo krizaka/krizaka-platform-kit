@@ -61,8 +61,10 @@
         <module>krizaka-web</module>
         <module>krizaka-observability</module>
         <module>krizaka-app-config</module>
+        <module>krizaka-idempotency</module>
         <module>starters</module>
         <module>examples/krizaka-starters-example</module>
+        <module>examples/krizaka-idempotency-example</module>
     </modules>
 
     <dependencyManagement>
@@ -135,6 +137,7 @@
                     <configuration>
                         <excludeArtifacts>
                             <excludeArtifact>krizaka-starters-example</excludeArtifact>
+                            <excludeArtifact>krizaka-idempotency-example</excludeArtifact>
                         </excludeArtifacts>
                     </configuration>
                 </plugin>

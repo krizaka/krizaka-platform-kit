@@ -39,6 +39,7 @@ tested.
 | [`krizaka-messaging`](krizaka-messaging) | `com.krizaka:krizaka-messaging` | **Events through the outbox** with their envelope in AMQP headers, consumer queues with **retry then DLQ**, **idempotent consumption** and the **transactional outbox relay** for RabbitMQ |
 | [`krizaka-web`](krizaka-web) | `com.krizaka:krizaka-web` | **RFC 9457 Problem Details** with stable codes, `X-Request-Id` → MDC, Jackson 3 defaults, cursor pagination, declared CORS |
 | [`krizaka-observability`](krizaka-observability) | `com.krizaka:krizaka-observability` | **Required service names** (product, service, version) as common metric tags, ECS JSON logs, health/info/prometheus exposed, 10 % trace sampling — defaults at the lowest priority |
+| [`krizaka-idempotency`](krizaka-idempotency) | `com.krizaka:krizaka-idempotency` | **HTTP `Idempotency-Key`**: an action runs at most once per key, a retry replays its response (`Idempotent-Replayed: true`), the same key for another request is a `422`; PostgreSQL store in the action's transaction — promoted from Orazaka |
 | [`krizaka-app-config`](krizaka-app-config) | `com.krizaka:krizaka-app-config` | **App version compatibility**: a public cached `GET /api/v1/app-config` (minimum and latest version, update mode, maintenance, contract range, store URL, flags, localized message) read from database parameters, **`426 Upgrade Required`** below the minimum, N-1 contract compatibility with `Deprecation`/`Sunset`, an audited admin API with rollback |
 
 Requires Java 21 and Spring Boot 4.0.
@@ -54,6 +55,7 @@ capabilities, never the Spring list behind them; a Spring Boot upgrade changes t
 | `com.krizaka:krizaka-spring-boot-starter-security` | `krizaka-security` + `spring-boot-starter-security` + `-oauth2-resource-server` |
 | `com.krizaka:krizaka-spring-boot-starter-rabbitmq` | `krizaka-messaging` + `spring-boot-starter-amqp` + `-jdbc` + `-jackson` (add your JDBC driver) |
 | `com.krizaka:krizaka-spring-boot-starter-observability` | `krizaka-observability` + `spring-boot-starter-actuator` + OpenTelemetry tracing (`spring-boot-micrometer-tracing-opentelemetry`, `micrometer-tracing-bridge-otel`, `opentelemetry-exporter-otlp`) + `micrometer-registry-prometheus` |
+| `com.krizaka:krizaka-spring-boot-starter-idempotency` | `krizaka-idempotency` + `krizaka-spring-boot-starter-web` + `spring-boot-starter-jdbc` (add your JDBC driver) |
 | `com.krizaka:krizaka-spring-boot-starter-app-config` | `krizaka-app-config` + `spring-boot-starter-webmvc` + `-jdbc` |
 
 The whole configuration of a service on the four starters — everything else is a kit default you can override
@@ -222,6 +224,34 @@ unexpected is a `500` whose message is logged with the `requestId`, never sent. 
 sent back and put in the MDC; Jackson writes ISO dates and omits nulls; `Cursor` / `CursorPage` page by key with an
 opaque token; CORS opens only the origins listed in `krizaka.web.cors.allowed-origins`. The full contract:
 [krizaka-web/README.md](krizaka-web/README.md).
+
+## krizaka-idempotency
+
+A client whose connection dropped after the server accepted a paid request cannot tell whether it ran; retrying blind
+pays twice. With a key, the retry is safe:
+
+```yaml
+krizaka:
+  idempotency.store: jdbc        # or memory (tests); the table: com/krizaka/idempotency/schema-postgresql.sql
+```
+
+```java
+@PostMapping("/api/v1/orders")
+ResponseEntity<Order> create(@RequestBody NewOrder order, @AuthenticationPrincipal Jwt caller,
+    @RequestHeader(value = IdempotencyKeys.KEY_HEADER, required = false) String key) {
+  return idempotency
+      .execute(new IdempotentRequest("orders.create", caller.getSubject(), key, order),
+          Order.class, () -> orders.create(order))
+      .toResponse(HttpStatus.CREATED);
+}
+```
+
+The first request runs the action and stores its response **in the action's transaction** (a failed action records
+nothing, its retry runs for real); a retry with the same key and request replays it with `Idempotent-Replayed: true`;
+the same key for another request is `422 idempotency-key-reused`; two concurrent requests with one key take turns on the
+key's primary key — the second waits, then replays. Keys live `krizaka.idempotency.ttl` (24 h) and are purged. Proven on
+PostgreSQL by `JdbcIdempotencyIT` and, over HTTP, by [`examples/krizaka-idempotency-example`](examples/krizaka-idempotency-example).
+Promoted from Orazaka's run starts (ADR-083).
 
 ## krizaka-app-config
 

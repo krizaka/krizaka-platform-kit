@@ -191,5 +191,37 @@
         "description" : "Parameters in memory: tests and demos."
       } ]
     } ]
+  }, {
+    "artifact" : "krizaka-idempotency",
+    "properties" : [ {
+      "name" : "krizaka.idempotency.purge-interval",
+      "type" : "java.time.Duration",
+      "description" : "Delay between two purges of the keys older than the time-to-live.",
+      "defaultValue" : "1h"
+    }, {
+      "name" : "krizaka.idempotency.store",
+      "type" : "com.krizaka.idempotency.IdempotencyProperties$Store",
+      "description" : "Where keys and their responses are kept: 'jdbc' (PostgreSQL, in the action's transaction, shared by every instance) or 'memory' (one instance). Required to get the Idempotency bean; never inferred from the classpath."
+    }, {
+      "name" : "krizaka.idempotency.table",
+      "type" : "java.lang.String",
+      "description" : "Table the keys are kept in when the store is 'jdbc'.",
+      "defaultValue" : "idempotency_keys"
+    }, {
+      "name" : "krizaka.idempotency.ttl",
+      "type" : "java.time.Duration",
+      "description" : "How long a key replays its response; after it, the same key runs the action again.",
+      "defaultValue" : "24h"
+    } ],
+    "hints" : [ {
+      "name" : "krizaka.idempotency.store",
+      "values" : [ {
+        "value" : "jdbc",
+        "description" : "Keys in the application's PostgreSQL database, in the action's transaction, shared by every instance."
+      }, {
+        "value" : "memory",
+        "description" : "Keys in this instance's memory: tests, demos, a single instance."
+      } ]
+    } ]
   } ]
 }
