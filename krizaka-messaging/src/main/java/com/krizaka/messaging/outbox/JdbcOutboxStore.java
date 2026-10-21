@@ -24,7 +24,8 @@ import tools.jackson.databind.json.JsonMapper;
  *   <li>{@link #append} inserts the row in the caller's transaction, due now;
  *   <li>it <b>leases</b>: {@link #leaseBatch} claims due rows in one short statement ({@code FOR
  *       UPDATE SKIP LOCKED}, then {@code next_attempt_at = now() + lease}), so the relay publishes
- *       outside any transaction and two instances never take the same row;
+ *       outside any transaction and two instances never take the same row; rows come out in the
+ *       order they were written;
  *   <li>a failure backs the row off exponentially — 1 s, 2 s, 4 s… up to {@code maxBackoff};
  *   <li>published rows are deleted after the relay's retention, through the index on {@code
  *       published_at}.
@@ -74,15 +75,18 @@ public final class JdbcOutboxStore implements OutboxStore {
         " FROM "
             + table
             + " WHERE published_at IS NULL AND next_attempt_at <= now()"
-            + " ORDER BY created_at LIMIT ? FOR UPDATE SKIP LOCKED";
+            + " ORDER BY seq LIMIT ? FOR UPDATE SKIP LOCKED";
     insert =
         "INSERT INTO "
             + table
             + " (id, exchange, routing_key, message_id, payload, headers)"
             + " VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb)";
     lock = "SELECT " + columns + due;
-    // UPDATE … RETURNING keeps no order: the leased rows are sorted again, oldest first, so events
-    // are published in the order they were written.
+    // Rows come out in the order they were written: by seq, an identity (two rows appended in the
+    // same
+    // microsecond tie on created_at). UPDATE … RETURNING keeps no order, so the leased rows are
+    // sorted
+    // again.
     lease =
         "WITH leased AS (UPDATE "
             + table
@@ -91,9 +95,9 @@ public final class JdbcOutboxStore implements OutboxStore {
             + due
             + ") RETURNING "
             + columns
-            + ", created_at) SELECT "
+            + ", seq) SELECT "
             + "id, exchange, routing_key, message_id, payload, headers, attempts"
-            + " FROM leased ORDER BY created_at";
+            + " FROM leased ORDER BY seq";
     published = "UPDATE " + table + " SET published_at = now() WHERE id = ?";
     failed =
         "UPDATE "
