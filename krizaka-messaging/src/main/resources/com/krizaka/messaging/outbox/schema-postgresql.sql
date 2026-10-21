@@ -3,6 +3,7 @@
 -- index if you set krizaka.messaging.outbox.jdbc.table.
 CREATE TABLE IF NOT EXISTS krizaka_outbox (
     id              UUID         PRIMARY KEY,
+    seq             BIGINT       GENERATED ALWAYS AS IDENTITY,
     exchange        VARCHAR(100) NOT NULL,
     routing_key     VARCHAR(255) NOT NULL,
     message_id      VARCHAR(255) NOT NULL UNIQUE,
