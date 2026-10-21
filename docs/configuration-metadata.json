@@ -262,5 +262,36 @@
       "defaultValue" : "krizaka_schema_history"
     } ],
     "hints" : [ ]
+  }, {
+    "artifact" : "krizaka-webhooks",
+    "properties" : [ {
+      "name" : "krizaka.webhooks.receiving.secrets",
+      "type" : "java.util.List<java.lang.String>",
+      "description" : "Secrets a received webhook may be signed with, the current one first. Setting one contributes the WebhookVerifier."
+    }, {
+      "name" : "krizaka.webhooks.receiving.tolerance",
+      "type" : "java.time.Duration",
+      "description" : "How far a webhook's timestamp may be from now, either way; an older capture replayed is refused.",
+      "defaultValue" : "5m"
+    }, {
+      "name" : "krizaka.webhooks.signing.connect-timeout",
+      "type" : "java.time.Duration",
+      "description" : "How long an attempt waits for the receiver's connection.",
+      "defaultValue" : "2s"
+    }, {
+      "name" : "krizaka.webhooks.signing.previous-secret",
+      "type" : "java.lang.String",
+      "description" : "Secret being rotated out: during a rotation both sign, and receivers that still hold the old one keep accepting."
+    }, {
+      "name" : "krizaka.webhooks.signing.read-timeout",
+      "type" : "java.time.Duration",
+      "description" : "How long an attempt waits for the receiver's answer.",
+      "defaultValue" : "10s"
+    }, {
+      "name" : "krizaka.webhooks.signing.secret",
+      "type" : "java.lang.String",
+      "description" : "Secret the webhooks this service sends are signed with ('whsec_' + base64, or plain text). Setting it contributes the WebhookSender."
+    } ],
+    "hints" : [ ]
   } ]
 }
