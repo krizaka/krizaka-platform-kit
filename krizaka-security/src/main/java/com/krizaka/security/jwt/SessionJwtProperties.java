@@ -12,7 +12,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * HS256 is a 256-bit HMAC, and a shorter key is a weaker key that still "works". A service that
  * starts with a short secret is a service that should not start.
  *
- * @param secret the HMAC-SHA256 secret, at least 32 characters (256 bits)
+ * @param secret Shared HMAC-SHA256 secret session tokens are verified with, at least 32 characters
+ *     (256 bits). Setting it switches local token verification on.
  */
 @ConfigurationProperties(prefix = "krizaka.security.jwt")
 public record SessionJwtProperties(String secret) {

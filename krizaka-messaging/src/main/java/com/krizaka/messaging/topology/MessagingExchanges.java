@@ -1,6 +1,7 @@
 package com.krizaka.messaging.topology;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
  * The exchanges a Krizaka building block publishes to and dead-letters through ({@code
@@ -18,12 +19,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *       dead-letter: platform.dlx    # direct exchange every queue dead-letters to
  * }</pre>
  *
- * @param events the topic exchange domain events are published to; default {@value #DEFAULT_EVENTS}
- * @param deadLetter the direct exchange failed messages are dead-lettered to; default {@value
- *     #DEFAULT_DEAD_LETTER}
+ * @param events Topic exchange domain events are published to.
+ * @param deadLetter Direct exchange failed messages are dead-lettered to; must differ from the
+ *     events exchange.
  */
 @ConfigurationProperties(prefix = "krizaka.messaging.exchanges")
-public record MessagingExchanges(String events, String deadLetter) {
+public record MessagingExchanges(
+    @DefaultValue(MessagingExchanges.DEFAULT_EVENTS) String events,
+    @DefaultValue(MessagingExchanges.DEFAULT_DEAD_LETTER) String deadLetter) {
 
   /** The default events exchange. */
   public static final String DEFAULT_EVENTS = "krizaka.events";

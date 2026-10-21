@@ -16,9 +16,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *   observability: { product: orazaka, service: conversation, version: "@project.version@" }
  * }</pre>
  *
- * @param product the product the service belongs to (e.g. {@code orazaka})
- * @param service the service's short name within the product (e.g. {@code conversation})
- * @param version the running build's version, usually filtered in by the build
+ * @param product Product the service belongs to, e.g. 'orazaka'. Required: tagged on every meter.
+ * @param service Short name of the service within its product, e.g. 'conversation'. Required:
+ *     tagged on every meter.
+ * @param version Version of the running build, usually filtered in by the build
+ *     ('@project.version@'). Required: tagged on every meter.
  */
 @ConfigurationProperties(prefix = "krizaka.observability")
 public record KrizakaObservabilityProperties(String product, String service, String version) {

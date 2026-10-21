@@ -17,6 +17,15 @@ class OutboxPropertiesTest {
     assertThat(properties.batchSize()).isEqualTo(100);
     assertThat(properties.purgeInterval()).isEqualTo(Duration.ofHours(1));
     assertThat(properties.retention()).isEqualTo(Duration.ofDays(7));
+    assertThat(properties.lease()).isEqualTo(Duration.ofMinutes(2));
+  }
+
+  @Test
+  void theLeaseIsConfigurable() {
+    assertThat(new OutboxProperties(null, null, null, null, null, Duration.ofMinutes(5)).lease())
+        .isEqualTo(Duration.ofMinutes(5));
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new OutboxProperties(true, null, null, null, null, Duration.ZERO));
   }
 
   @Test

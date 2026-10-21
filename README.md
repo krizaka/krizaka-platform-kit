@@ -246,6 +246,19 @@ missing. Every meter is tagged `product`, `service`, `version`. At the lowest pr
 `management.tracing.sampling.probability=0.1`. The OTLP exporter sends spans once
 `management.opentelemetry.tracing.export.otlp.endpoint` (Spring Boot 4) is set.
 
+## Configuration reference
+
+Every `krizaka.*` property is in the metadata Spring Boot's configuration processor generates, with its description and
+its default, so an IDE completes and documents it. The full table is on
+[java.krizaka.com/configuration](https://java.krizaka.com/configuration), rendered from
+[`docs/configuration-metadata.json`](docs/configuration-metadata.json) — which `ConfigurationReferenceTest` (in the
+example) holds equal to the generated metadata, and which fails on a property without a description or a default. After
+changing a property:
+
+```bash
+./mvnw verify -Dkrizaka.reference.write=true   # regenerate docs/configuration-metadata.json, then commit it
+```
+
 ## Build
 
 ```bash
