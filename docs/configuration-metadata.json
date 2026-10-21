@@ -293,5 +293,43 @@
       "description" : "Secret the webhooks this service sends are signed with ('whsec_' + base64, or plain text). Setting it contributes the WebhookSender."
     } ],
     "hints" : [ ]
+  }, {
+    "artifact" : "krizaka-ratelimit",
+    "properties" : [ {
+      "name" : "krizaka.ratelimit.client-ip-header",
+      "type" : "java.lang.String",
+      "description" : "Header a trusted proxy sets to the client's address, read before X-Forwarded-For; blank for none.",
+      "defaultValue" : ""
+    }, {
+      "name" : "krizaka.ratelimit.exclude-paths",
+      "type" : "java.util.List<java.lang.String>",
+      "description" : "Ant patterns of the paths that never are (health checks, probes).",
+      "defaultValue" : "/actuator/**"
+    }, {
+      "name" : "krizaka.ratelimit.include-paths",
+      "type" : "java.util.List<java.lang.String>",
+      "description" : "Ant patterns of the paths that are limited.",
+      "defaultValue" : "/**"
+    }, {
+      "name" : "krizaka.ratelimit.max-keys",
+      "type" : "java.lang.Integer",
+      "description" : "How many keys are tracked per instance before idle ones are forgotten; a busy key is never forgotten.",
+      "defaultValue" : 10000
+    }, {
+      "name" : "krizaka.ratelimit.mode",
+      "type" : "com.krizaka.ratelimit.RateLimitMode",
+      "description" : "How the limit is applied: 'enforce' answers 429 once a key's bucket is empty, 'observe' counts and flags but never refuses (roll the limit out with it), 'off' keeps nothing.",
+      "defaultValue" : "enforce"
+    }, {
+      "name" : "krizaka.ratelimit.requests-per-minute",
+      "type" : "java.lang.Integer",
+      "description" : "Requests per minute a key may make, for a key that brings no limit of its own. A bucket holds one minute's worth, so a client may burst up to it.",
+      "defaultValue" : 600
+    }, {
+      "name" : "krizaka.ratelimit.trusted-proxies",
+      "type" : "java.util.List<java.lang.String>",
+      "description" : "Addresses or CIDR ranges of the proxies in front of the service. Only behind one is the forwarded address of a request trusted as its client; empty, the direct peer is always the client."
+    } ],
+    "hints" : [ ]
   } ]
 }

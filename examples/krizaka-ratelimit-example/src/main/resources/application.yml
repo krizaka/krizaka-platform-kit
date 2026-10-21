@@ -1,0 +1,6 @@
+spring:
+  application.name: krizaka-ratelimit-example
+krizaka:
+  ratelimit:
+    mode: enforce               # observe first to see who would be refused, then enforce
+    requests-per-minute: 3      # for a key that brings no tier of its own (small, so the example shows a 429)
