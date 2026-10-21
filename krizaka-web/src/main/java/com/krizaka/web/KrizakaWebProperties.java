@@ -27,8 +27,8 @@ public record KrizakaWebProperties(@DefaultValue Problems problems, @DefaultValu
   /**
    * Problem Details settings ({@code krizaka.web.problems}).
    *
-   * @param baseType Prefix every Problem Details 'type' is resolved against ('<base-type><code>').
-   *     Absolute, ending with '/'.
+   * @param baseType Prefix every Problem Details 'type' is resolved against: the type is this base
+   *     followed by the problem's code. Absolute, ending with '/'.
    */
   public record Problems(@DefaultValue(Problems.DEFAULT_BASE_TYPE) URI baseType) {
 
