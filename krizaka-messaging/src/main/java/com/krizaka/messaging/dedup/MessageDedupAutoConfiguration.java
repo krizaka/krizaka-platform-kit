@@ -1,6 +1,7 @@
 package com.krizaka.messaging.dedup;
 
 import io.micrometer.observation.ObservationRegistry;
+import java.time.Clock;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -74,6 +75,21 @@ public class MessageDedupAutoConfiguration {
       return ObservedMessageDedup.of(
           new JdbcMessageDedup(jdbc, properties.table()), observations.getIfAvailable());
     }
+  }
+
+  /**
+   * Forgets the claims older than the retention, every {@code purge-interval}.
+   *
+   * @param dedup the store
+   * @param properties the retention and the interval
+   * @return the scheduler, started with the context
+   */
+  @Bean
+  @ConditionalOnMissingBean(MessageDedupPurgeScheduler.class)
+  public MessageDedupPurgeScheduler messageDedupPurgeScheduler(
+      MessageDedup dedup, MessageDedupProperties properties) {
+    return new MessageDedupPurgeScheduler(
+        dedup, properties.retention(), properties.purgeInterval(), Clock.systemUTC());
   }
 
   /** The {@code dedup} health component, where Actuator's health support is present. */

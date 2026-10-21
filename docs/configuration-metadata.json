@@ -45,6 +45,16 @@
       "description" : "Whether krizaka-messaging contributes the JSON message converter and the listener container factory (retry with back-off, then <queue>.dlq).",
       "defaultValue" : true
     }, {
+      "name" : "krizaka.messaging.dedup.purge-interval",
+      "type" : "java.time.Duration",
+      "description" : "Delay between two purges of the claims older than the retention.",
+      "defaultValue" : "1h"
+    }, {
+      "name" : "krizaka.messaging.dedup.retention",
+      "type" : "java.time.Duration",
+      "description" : "How long a claim is kept; beyond the broker's longest redelivery window, a claim protects nothing.",
+      "defaultValue" : "7d"
+    }, {
       "name" : "krizaka.messaging.dedup.store",
       "type" : "com.krizaka.messaging.dedup.MessageDedupProperties$Store",
       "description" : "Where claims are kept: 'jdbc' (durable, shared by the instances) or 'memory' (one instance). Required to get a MessageDedup bean; never inferred from the classpath."
@@ -78,6 +88,21 @@
       "type" : "java.lang.Integer",
       "description" : "Consecutive failures (batches that threw, publishes that failed) after which the outbox health indicator reports DOWN; reset by the next success.",
       "defaultValue" : 10
+    }, {
+      "name" : "krizaka.messaging.outbox.jdbc.enabled",
+      "type" : "java.lang.Boolean",
+      "description" : "Whether the kit contributes JdbcOutboxStore, its PostgreSQL outbox, instead of a store the application writes. Off by default: a service that has its own keeps it.",
+      "defaultValue" : false
+    }, {
+      "name" : "krizaka.messaging.outbox.jdbc.max-backoff",
+      "type" : "java.time.Duration",
+      "description" : "Longest wait before a row whose publish failed is tried again; the waits double from one second up to it.",
+      "defaultValue" : "15m"
+    }, {
+      "name" : "krizaka.messaging.outbox.jdbc.table",
+      "type" : "java.lang.String",
+      "description" : "Table of the outbox (schema com/krizaka/messaging/outbox/schema-postgresql.sql).",
+      "defaultValue" : "krizaka_outbox"
     }, {
       "name" : "krizaka.messaging.outbox.lease",
       "type" : "java.time.Duration",

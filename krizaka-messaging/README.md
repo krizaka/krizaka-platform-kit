@@ -110,9 +110,24 @@ know. An incompatible one (a field removed, renamed or retyped) is published und
 until every consumer has moved; no shared jar of event classes, ever — each consumer keeps its own copy of the
 contract.
 
-## Recommended outbox schema
+## The kit's outbox store
 
-The kit never creates a table: each context owns its outbox and implements `OutboxStore` over it.
+```yaml
+krizaka:
+  messaging:
+    outbox.jdbc.enabled: true      # JdbcOutboxStore over krizaka_outbox (krizaka.messaging.outbox.jdbc.table)
+    dedup.store: jdbc              # claims kept krizaka.messaging.dedup.retention (7 d), purged every hour
+```
+
+`JdbcOutboxStore` is the PostgreSQL outbox written once: `append` in your transaction, **leasing** (the relay publishes
+outside any transaction, two instances never take the same row, rows come out oldest first), exponential back-off up to
+`krizaka.messaging.outbox.jdbc.max-backoff` (15 min), purge through an index on `published_at`. Its table is
+`com/krizaka/messaging/outbox/schema-postgresql.sql`, the claims table `com/krizaka/messaging/dedup/schema-postgresql.sql`
+(with the index on `processed_at` the purge needs). A store of your own still wins: the kit's backs off.
+
+## Recommended outbox schema (a store of your own)
+
+A context may own its outbox and implement `OutboxStore` over it.
 
 ```sql
 CREATE TABLE wallet_outbox (
