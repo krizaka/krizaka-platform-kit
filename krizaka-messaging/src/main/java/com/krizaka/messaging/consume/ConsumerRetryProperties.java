@@ -2,6 +2,7 @@ package com.krizaka.messaging.consume;
 
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
  * How a failing listener is retried before its message goes to the dead-letter queue ({@code
@@ -17,15 +18,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *       max: 10s            # cap on one wait
  * }</pre>
  *
- * @param maxAttempts how many times the listener runs before the message is dead-lettered; default
- *     5, at least 1
- * @param initial the wait before the second attempt; default 500 ms
- * @param multiplier the factor between two consecutive waits; default 2, at least 1
- * @param max the longest wait; default 10 s, not shorter than {@code initial}
+ * @param max Longest wait between two attempts, not shorter than the initial wait.
+ * @param maxAttempts How many times the listener runs before the message is dead-lettered, the
+ *     first delivery included; at least 1.
+ * @param initial Wait before the second attempt.
+ * @param multiplier Factor between two consecutive waits; at least 1.
  */
 @ConfigurationProperties(prefix = "krizaka.messaging.retry")
 public record ConsumerRetryProperties(
-    Integer maxAttempts, Duration initial, Double multiplier, Duration max) {
+    @DefaultValue("5") Integer maxAttempts,
+    @DefaultValue("500ms") Duration initial,
+    @DefaultValue("2") Double multiplier,
+    @DefaultValue("10s") Duration max) {
 
   /** Applies the defaults and refuses a policy that could not run. */
   public ConsumerRetryProperties {

@@ -3,6 +3,7 @@ package com.krizaka.web;
 import java.net.URI;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
  * The HTTP baseline a service declares ({@code krizaka.web}).
@@ -11,11 +12,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * answer as one that reads this class — and a value that would silently weaken the contract (a
  * relative problem base, a wildcard origin) fails at startup with the reason.
  *
- * @param problems how Problem Details {@code type} URIs are built
- * @param cors the browser origins this service answers; none by default
+ * @param problems How Problem Details type URIs are built.
+ * @param cors The browser origins this service answers.
  */
 @ConfigurationProperties(prefix = "krizaka.web")
-public record KrizakaWebProperties(Problems problems, Cors cors) {
+public record KrizakaWebProperties(@DefaultValue Problems problems, @DefaultValue Cors cors) {
 
   /** Normalises the defaults. */
   public KrizakaWebProperties {
@@ -26,11 +27,10 @@ public record KrizakaWebProperties(Problems problems, Cors cors) {
   /**
    * Problem Details settings ({@code krizaka.web.problems}).
    *
-   * @param baseType the prefix every problem {@code type} is resolved against — {@code
-   *     <baseType><code>}; absolute and ending with {@code /}. Defaults to {@value
-   *     #DEFAULT_BASE_TYPE}
+   * @param baseType Prefix every Problem Details 'type' is resolved against: the type is this base
+   *     followed by the problem's code. Absolute, ending with '/'.
    */
-  public record Problems(URI baseType) {
+  public record Problems(@DefaultValue(Problems.DEFAULT_BASE_TYPE) URI baseType) {
 
     /** Where the stable error codes are documented. */
     public static final String DEFAULT_BASE_TYPE = "https://krizaka.com/problems/";
@@ -53,8 +53,8 @@ public record KrizakaWebProperties(Problems problems, Cors cors) {
   /**
    * Browser origins ({@code krizaka.web.cors}).
    *
-   * @param allowedOrigins the exact origins (scheme, host, port) a browser may call this service
-   *     from; empty means none — a service without a front end opens nothing
+   * @param allowedOrigins Exact browser origins (scheme, host, port) allowed to call the service.
+   *     Empty, the default, allows none and registers no CORS policy; '*' is refused.
    */
   public record Cors(List<String> allowedOrigins) {
 

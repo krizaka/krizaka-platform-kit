@@ -3,6 +3,7 @@ package com.krizaka.messaging.outbox;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -48,6 +49,22 @@ class OutboxAutoConfigurationTest {
                     .getFailure()
                     .rootCause()
                     .hasMessageContaining("AmqpTemplate"));
+  }
+
+  @Test
+  void bindsEveryPropertyWithItsDefault() {
+    runner.run(
+        context -> {
+          OutboxProperties properties = context.getBean(OutboxProperties.class);
+          assertThat(properties.lease()).isEqualTo(Duration.ofMinutes(2));
+          assertThat(properties.pollInterval()).isEqualTo(Duration.ofMillis(500));
+        });
+    runner
+        .withPropertyValues("krizaka.messaging.outbox.lease=5m")
+        .run(
+            context ->
+                assertThat(context.getBean(OutboxProperties.class).lease())
+                    .isEqualTo(Duration.ofMinutes(5)));
   }
 
   @Test

@@ -41,7 +41,7 @@ public class OutboxAutoConfiguration {
    * @param stores the application's outbox stores; none means nothing is scheduled
    * @param amqp where rows are published
    * @param transactionManager the transaction each batch runs in
-   * @param properties intervals, batch size and retention
+   * @param properties intervals, batch size, retention and lease
    * @return the scheduler, started with the application context
    */
   @Bean
@@ -71,7 +71,8 @@ public class OutboxAutoConfiguration {
                         transactions,
                         properties.batchSize(),
                         properties.retention(),
-                        Clock.systemUTC()))
+                        Clock.systemUTC(),
+                        properties.lease()))
             .toList();
     return new OutboxRelayScheduler(relays, properties.pollInterval(), properties.purgeInterval());
   }

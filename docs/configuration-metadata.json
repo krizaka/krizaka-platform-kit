@@ -1,0 +1,190 @@
+{
+  "repository" : "krizaka-platform-kit",
+  "modules" : [ {
+    "artifact" : "krizaka-web",
+    "properties" : [ {
+      "name" : "krizaka.web.cors.allowed-origins",
+      "type" : "java.util.List<java.lang.String>",
+      "description" : "Exact browser origins (scheme, host, port) allowed to call the service. Empty, the default, allows none and registers no CORS policy; '*' is refused."
+    }, {
+      "name" : "krizaka.web.problems.base-type",
+      "type" : "java.net.URI",
+      "description" : "Prefix every Problem Details 'type' is resolved against: the type is this base followed by the problem's code. Absolute, ending with '/'.",
+      "defaultValue" : "https://krizaka.com/problems/"
+    } ],
+    "hints" : [ ]
+  }, {
+    "artifact" : "krizaka-security",
+    "properties" : [ {
+      "name" : "krizaka.security.jwt.secret",
+      "type" : "java.lang.String",
+      "description" : "Shared HMAC-SHA256 secret session tokens are verified with, at least 32 characters (256 bits). Setting it switches local token verification on."
+    } ],
+    "hints" : [ ]
+  }, {
+    "artifact" : "krizaka-observability",
+    "properties" : [ {
+      "name" : "krizaka.observability.product",
+      "type" : "java.lang.String",
+      "description" : "Product the service belongs to, e.g. 'orazaka'. Required: tagged on every meter."
+    }, {
+      "name" : "krizaka.observability.service",
+      "type" : "java.lang.String",
+      "description" : "Short name of the service within its product, e.g. 'conversation'. Required: tagged on every meter."
+    }, {
+      "name" : "krizaka.observability.version",
+      "type" : "java.lang.String",
+      "description" : "Version of the running build, usually filtered in by the build ('@project.version@'). Required: tagged on every meter."
+    } ],
+    "hints" : [ ]
+  }, {
+    "artifact" : "krizaka-messaging",
+    "properties" : [ {
+      "name" : "krizaka.messaging.consumer.enabled",
+      "type" : "java.lang.Boolean",
+      "description" : "Whether krizaka-messaging contributes the JSON message converter and the listener container factory (retry with back-off, then <queue>.dlq).",
+      "defaultValue" : true
+    }, {
+      "name" : "krizaka.messaging.dedup.store",
+      "type" : "com.krizaka.messaging.dedup.MessageDedupProperties$Store",
+      "description" : "Where claims are kept: 'jdbc' (durable, shared by the instances) or 'memory' (one instance). Required to get a MessageDedup bean; never inferred from the classpath."
+    }, {
+      "name" : "krizaka.messaging.dedup.table",
+      "type" : "java.lang.String",
+      "description" : "Table the claims are kept in when the store is 'jdbc'.",
+      "defaultValue" : "processed_messages"
+    }, {
+      "name" : "krizaka.messaging.exchanges.dead-letter",
+      "type" : "java.lang.String",
+      "description" : "Direct exchange failed messages are dead-lettered to; must differ from the events exchange.",
+      "defaultValue" : "krizaka.dlx"
+    }, {
+      "name" : "krizaka.messaging.exchanges.events",
+      "type" : "java.lang.String",
+      "description" : "Topic exchange domain events are published to.",
+      "defaultValue" : "krizaka.events"
+    }, {
+      "name" : "krizaka.messaging.outbox.batch-size",
+      "type" : "java.lang.Integer",
+      "description" : "Most rows one batch claims and publishes.",
+      "defaultValue" : 100
+    }, {
+      "name" : "krizaka.messaging.outbox.enabled",
+      "type" : "java.lang.Boolean",
+      "description" : "Whether a relay is scheduled for each OutboxStore bean.",
+      "defaultValue" : true
+    }, {
+      "name" : "krizaka.messaging.outbox.lease",
+      "type" : "java.time.Duration",
+      "description" : "How long a row claimed by a leasing store stays invisible to the other relays. Keep it longer than a batch takes to publish, or two relays publish the same row.",
+      "defaultValue" : "2m"
+    }, {
+      "name" : "krizaka.messaging.outbox.poll-interval",
+      "type" : "java.time.Duration",
+      "description" : "Delay between two batches of pending rows.",
+      "defaultValue" : "500ms"
+    }, {
+      "name" : "krizaka.messaging.outbox.purge-interval",
+      "type" : "java.time.Duration",
+      "description" : "Delay between two purges of published rows.",
+      "defaultValue" : "1h"
+    }, {
+      "name" : "krizaka.messaging.outbox.retention",
+      "type" : "java.time.Duration",
+      "description" : "How long published rows are kept before the purge deletes them.",
+      "defaultValue" : "7d"
+    }, {
+      "name" : "krizaka.messaging.producer",
+      "type" : "java.lang.String",
+      "description" : "Name of this service, stamped on every event it publishes (kz-producer). Required as soon as an EventPublisher is injected; never guessed from the application name."
+    }, {
+      "name" : "krizaka.messaging.retry.initial",
+      "type" : "java.time.Duration",
+      "description" : "Wait before the second attempt.",
+      "defaultValue" : "500ms"
+    }, {
+      "name" : "krizaka.messaging.retry.max",
+      "type" : "java.time.Duration",
+      "description" : "Longest wait between two attempts, not shorter than the initial wait.",
+      "defaultValue" : "10s"
+    }, {
+      "name" : "krizaka.messaging.retry.max-attempts",
+      "type" : "java.lang.Integer",
+      "description" : "How many times the listener runs before the message is dead-lettered, the first delivery included; at least 1.",
+      "defaultValue" : 5
+    }, {
+      "name" : "krizaka.messaging.retry.multiplier",
+      "type" : "java.lang.Double",
+      "description" : "Factor between two consecutive waits; at least 1.",
+      "defaultValue" : 2
+    } ],
+    "hints" : [ {
+      "name" : "krizaka.messaging.dedup.store",
+      "values" : [ {
+        "value" : "jdbc",
+        "description" : "Claims in the application's database: durable, shared by every instance."
+      }, {
+        "value" : "memory",
+        "description" : "Claims in this instance's memory: tests, or a single instance that accepts losing them on restart."
+      } ]
+    } ]
+  }, {
+    "artifact" : "krizaka-app-config",
+    "properties" : [ {
+      "name" : "krizaka.app-config.admin.authority",
+      "type" : "java.lang.String",
+      "description" : "Authority a caller must hold to use the admin API.",
+      "defaultValue" : "ROLE_ADMIN"
+    }, {
+      "name" : "krizaka.app-config.admin.enabled",
+      "type" : "java.lang.Boolean",
+      "description" : "Whether the audited admin API (/api/v1/admin/app-config) is registered.",
+      "defaultValue" : false
+    }, {
+      "name" : "krizaka.app-config.cache-ttl",
+      "type" : "java.time.Duration",
+      "description" : "How long this instance reuses a parameter set it read.",
+      "defaultValue" : "30s"
+    }, {
+      "name" : "krizaka.app-config.enabled",
+      "type" : "java.lang.Boolean",
+      "description" : "Whether the app-config endpoint and the version filter are registered.",
+      "defaultValue" : true
+    }, {
+      "name" : "krizaka.app-config.guard.enabled",
+      "type" : "java.lang.Boolean",
+      "description" : "Whether the 426 Upgrade Required filter is registered.",
+      "defaultValue" : true
+    }, {
+      "name" : "krizaka.app-config.guard.exclude",
+      "type" : "java.util.List<java.lang.String>",
+      "description" : "Ant patterns the filter never guards: the app-config endpoint itself, so an old client can always learn it must update.",
+      "defaultValue" : "[/api/v1/app-config, /api/v1/admin/app-config/**]"
+    }, {
+      "name" : "krizaka.app-config.guard.include",
+      "type" : "java.util.List<java.lang.String>",
+      "description" : "Ant patterns of the paths the filter guards.",
+      "defaultValue" : "/api/**"
+    }, {
+      "name" : "krizaka.app-config.http-max-age",
+      "type" : "java.time.Duration",
+      "description" : "Max-age of the public app-config endpoint, for CDNs and clients.",
+      "defaultValue" : "60s"
+    }, {
+      "name" : "krizaka.app-config.store",
+      "type" : "com.krizaka.appconfig.KrizakaAppConfigProperties$Store",
+      "description" : "Where the parameters are kept: 'jdbc' (the application's database) or 'memory' (tests and demos).",
+      "defaultValue" : "jdbc"
+    } ],
+    "hints" : [ {
+      "name" : "krizaka.app-config.store",
+      "values" : [ {
+        "value" : "jdbc",
+        "description" : "Parameters in the application's database, through its JdbcTemplate."
+      }, {
+        "value" : "memory",
+        "description" : "Parameters in memory: tests and demos."
+      } ]
+    } ]
+  } ]
+}

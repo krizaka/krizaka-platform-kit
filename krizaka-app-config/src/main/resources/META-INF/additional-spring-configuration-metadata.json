@@ -1,0 +1,11 @@
+{
+  "hints": [
+    {
+      "name": "krizaka.app-config.store",
+      "values": [
+        { "value": "jdbc", "description": "Parameters in the application's database, through its JdbcTemplate." },
+        { "value": "memory", "description": "Parameters in memory: tests and demos." }
+      ]
+    }
+  ]
+}
