@@ -83,7 +83,7 @@ class WebhookVerifierTest {
     assertThatThrownBy(
             () ->
                 verifier("s3cret")
-                    .verify(n -> n.equals(WebhookSignature.ID) ? null : headers.get(n), BODY))
+                    .verify(n -> WebhookSignature.ID.equals(n) ? null : headers.get(n), BODY))
         .isInstanceOf(InvalidWebhookException.class);
   }
 
@@ -95,7 +95,7 @@ class WebhookVerifierTest {
             () ->
                 verifier("s3cret")
                     .verify(
-                        n -> n.equals(WebhookSignature.TIMESTAMP) ? "yesterday" : headers.get(n),
+                        n -> WebhookSignature.TIMESTAMP.equals(n) ? "yesterday" : headers.get(n),
                         BODY))
         .hasMessageContaining("number");
   }
@@ -123,7 +123,7 @@ class WebhookVerifierTest {
     assertThatThrownBy(
             () ->
                 verifier("s3cret")
-                    .verify(n -> n.equals(WebhookSignature.SIGNATURE) ? v2 : headers.get(n), BODY))
+                    .verify(n -> WebhookSignature.SIGNATURE.equals(n) ? v2 : headers.get(n), BODY))
         .isInstanceOf(InvalidWebhookException.class);
   }
 
