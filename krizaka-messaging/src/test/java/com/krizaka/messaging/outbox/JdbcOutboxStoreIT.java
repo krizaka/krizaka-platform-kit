@@ -23,6 +23,9 @@ class JdbcOutboxStoreIT extends AbstractContainerIntegrationTest {
   private static JdbcTemplate jdbc;
   private static JdbcOutboxStore store;
 
+  /** Its own table: the relay of another test's Spring context must not lease these rows. */
+  private static final String TABLE = "outbox_store_it";
+
   @BeforeAll
   static void schema() throws Exception {
     jdbc =
@@ -31,20 +34,19 @@ class JdbcOutboxStoreIT extends AbstractContainerIntegrationTest {
                 postgres().getJdbcUrl(), postgres().getUsername(), postgres().getPassword()));
     String schema =
         new ClassPathResource("com/krizaka/messaging/outbox/schema-postgresql.sql")
-            .getContentAsString(StandardCharsets.UTF_8);
+            .getContentAsString(StandardCharsets.UTF_8)
+            .replace("krizaka_outbox", TABLE);
     for (String statement : schema.replaceAll("(?m)^--.*$", "").split(";")) {
       if (!statement.isBlank()) {
         jdbc.execute(statement);
       }
     }
-    store =
-        new JdbcOutboxStore(
-            jdbc, JsonMapper.shared(), JdbcOutboxStore.DEFAULT_TABLE, Duration.ofMinutes(15));
+    store = new JdbcOutboxStore(jdbc, JsonMapper.shared(), TABLE, Duration.ofMinutes(15));
   }
 
   @BeforeEach
   void empty() {
-    jdbc.update("DELETE FROM krizaka_outbox");
+    jdbc.update("DELETE FROM " + TABLE);
   }
 
   private static void append(String messageId) {
@@ -78,7 +80,7 @@ class JdbcOutboxStoreIT extends AbstractContainerIntegrationTest {
     assertThat(store.leaseBatch(10, Duration.ofMinutes(2))).hasSize(1);
     assertThat(store.leaseBatch(10, Duration.ofMinutes(2))).as("a second relay").isEmpty();
 
-    jdbc.update("UPDATE krizaka_outbox SET next_attempt_at = now() - interval '1 second'");
+    jdbc.update("UPDATE " + TABLE + " SET next_attempt_at = now() - interval '1 second'");
     assertThat(store.leaseBatch(10, Duration.ofMinutes(2))).as("the lease ended").hasSize(1);
   }
 
@@ -88,7 +90,7 @@ class JdbcOutboxStoreIT extends AbstractContainerIntegrationTest {
     UUID id = store.leaseBatch(10, Duration.ofMillis(1)).getFirst().id();
 
     store.markPublished(id);
-    jdbc.update("UPDATE krizaka_outbox SET next_attempt_at = now() - interval '1 second'");
+    jdbc.update("UPDATE " + TABLE + " SET next_attempt_at = now() - interval '1 second'");
 
     assertThat(store.leaseBatch(10, Duration.ofMinutes(2))).isEmpty();
     assertThat(store.purgePublishedBefore(Instant.now().minusSeconds(3600))).isZero();
@@ -104,7 +106,7 @@ class JdbcOutboxStoreIT extends AbstractContainerIntegrationTest {
 
     Map<String, Object> row =
         jdbc.queryForMap(
-            "SELECT attempts, EXTRACT(EPOCH FROM next_attempt_at - now()) AS wait FROM krizaka_outbox");
+            "SELECT attempts, EXTRACT(EPOCH FROM next_attempt_at - now()) AS wait FROM " + TABLE);
     assertThat(row.get("attempts")).isEqualTo(1);
     assertThat(((Number) row.get("wait")).doubleValue()).isBetween(6.0, 8.5);
   }
