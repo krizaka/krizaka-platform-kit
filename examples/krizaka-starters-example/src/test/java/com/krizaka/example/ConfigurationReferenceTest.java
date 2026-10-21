@@ -38,7 +38,8 @@ class ConfigurationReferenceTest {
           "krizaka-messaging",
           "krizaka-app-config",
           "krizaka-idempotency",
-          "krizaka-persistence");
+          "krizaka-persistence",
+          "krizaka-webhooks");
 
   /**
    * The properties that have no default, on purpose: a value only the service can give (its secret,
@@ -53,6 +54,9 @@ class ConfigurationReferenceTest {
           "krizaka.messaging.producer",
           "krizaka.messaging.dedup.store",
           "krizaka.idempotency.store",
+          "krizaka.webhooks.signing.secret",
+          "krizaka.webhooks.signing.previous-secret",
+          "krizaka.webhooks.receiving.secrets",
           "krizaka.web.cors.allowed-origins");
 
   static final Path ROOT = Path.of("../..");
