@@ -5,6 +5,41 @@ artifact is the one `krizaka-bom` carries. Releases are written by
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.3.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.2.0...v0.3.0) (2026-10-23)
+
+
+### Features
+
+* **app-config:** krizaka-app-config — app version compatibility, 426 Upgrade Required and N-1 contracts ([#36](https://github.com/krizaka/krizaka-platform-kit/issues/36)) ([7ada484](https://github.com/krizaka/krizaka-platform-kit/commit/7ada4843a92518a1798963d9bd51368145203a5a))
+* **config:** every property in the generated metadata with its default, a configurable outbox lease, the configuration reference ([#50](https://github.com/krizaka/krizaka-platform-kit/issues/50)) ([0b95227](https://github.com/krizaka/krizaka-platform-kit/commit/0b9522782d8c23db3a69a761f5bb2e8401a8300f))
+* **health:** dedup and appConfig health indicators ([#53](https://github.com/krizaka/krizaka-platform-kit/issues/53)) ([253dadc](https://github.com/krizaka/krizaka-platform-kit/commit/253dadccdb72aae0d72bd47ef551038aa5727613)), closes [#48](https://github.com/krizaka/krizaka-platform-kit/issues/48)
+* **idempotency:** HTTP Idempotency-Key as a building block — krizaka-idempotency, its starter and an example app ([#52](https://github.com/krizaka/krizaka-platform-kit/issues/52)) ([2a7181c](https://github.com/krizaka/krizaka-platform-kit/commit/2a7181c2528e21360e14faf7a6f3437f909e85ba))
+* **messaging:** MessageDedup.processOnce — claim, run, give the claim back on failure ([#12](https://github.com/krizaka/krizaka-platform-kit/issues/12)) ([2fa3723](https://github.com/krizaka/krizaka-platform-kit/commit/2fa372333144b6284f341075453a17c35afe3213))
+* **messaging:** the kit's PostgreSQL outbox store, the dedup purge on a schedule, the schemas with their indexes ([#54](https://github.com/krizaka/krizaka-platform-kit/issues/54)) ([36507f4](https://github.com/krizaka/krizaka-platform-kit/commit/36507f47e353796b791d0567bbef1b75690fdeac))
+* **observability:** outbox health indicator, observations of the relay, publish and dedup, krizaka in /actuator/info ([#51](https://github.com/krizaka/krizaka-platform-kit/issues/51)) ([c7be01e](https://github.com/krizaka/krizaka-platform-kit/commit/c7be01ecb86bcb4e746364ab880e9240add4caba))
+* **persistence:** the kit's tables migrated at startup — krizaka-persistence and its starter ([#55](https://github.com/krizaka/krizaka-platform-kit/issues/55)) ([e747658](https://github.com/krizaka/krizaka-platform-kit/commit/e747658098459d16714817cd0af2427674cbb31c))
+* **ratelimit:** requests per minute per key — module, starter and example app ([#58](https://github.com/krizaka/krizaka-platform-kit/issues/58)) ([b2a2683](https://github.com/krizaka/krizaka-platform-kit/commit/b2a26830403c987ca1e6d93c3afc627d0750288f))
+* **webhooks:** Standard Webhooks signing, sending and verification — module, starter and example app ([#56](https://github.com/krizaka/krizaka-platform-kit/issues/56)) ([3776a62](https://github.com/krizaka/krizaka-platform-kit/commit/3776a623b09f0d8a63285f59a648f5e35c93a7fe))
+
+
+### Bug Fixes
+
+* **deps:** declare commons-compress 1.28.0 (Scorecard Vulnerabilities: Testcontainers' 1.24) ([#43](https://github.com/krizaka/krizaka-platform-kit/issues/43)) ([6ba1a6b](https://github.com/krizaka/krizaka-platform-kit/commit/6ba1a6bab0d962841687925c35321ab8f3da24ac))
+* **deps:** security overrides of the Boot BOM (jackson 3.1.7/2.21.7, amqp-client 5.37.0, opentelemetry 1.62.0, tomcat 11.0.25); release-please token read-only at top level ([#34](https://github.com/krizaka/krizaka-platform-kit/issues/34)) ([257d7df](https://github.com/krizaka/krizaka-platform-kit/commit/257d7df6fd28ba07407d2d145111abb07ae353e7))
+* **deps:** Spring Boot 4.0.8 in the root pom (parent 0.2.0 from Central still manages 4.0.7: netty, postgresql, webmvc alerts) ([#37](https://github.com/krizaka/krizaka-platform-kit/issues/37)) ([8576c53](https://github.com/krizaka/krizaka-platform-kit/commit/8576c530782d6e11ba5b23d7beff36687429fc4d))
+* **messaging:** the dead letter keeps its stack trace — opt in, Spring AMQP 4.0.5 leaves it out by default ([#25](https://github.com/krizaka/krizaka-platform-kit/issues/25)) ([8910317](https://github.com/krizaka/krizaka-platform-kit/commit/8910317c73a5d1186f9175ec28ab4d6a2e036810))
+* **outbox:** publish outside the database transaction with leasing stores ([#45](https://github.com/krizaka/krizaka-platform-kit/issues/45)) ([#46](https://github.com/krizaka/krizaka-platform-kit/issues/46)) ([abed6fb](https://github.com/krizaka/krizaka-platform-kit/commit/abed6fb5b0c9fe0f92554576c3c27bcc553ef94a))
+* **test:** governance tests apply only the rules whose subject the library has (no vacuous rule, GOV-006) ([#33](https://github.com/krizaka/krizaka-platform-kit/issues/33)) ([a02e27f](https://github.com/krizaka/krizaka-platform-kit/commit/a02e27f2f9fc3a8ad894285f854fd7b334d42f7a))
+
+
+### Documentation
+
+* **agents:** no test, not done — every feature and fix ships with its tests ([#23](https://github.com/krizaka/krizaka-platform-kit/issues/23)) ([ee2259c](https://github.com/krizaka/krizaka-platform-kit/commit/ee2259c735b24668cbc4b359c498970825ab309f))
+* **config:** the webhooks properties in the configuration reference ([#57](https://github.com/krizaka/krizaka-platform-kit/issues/57)) ([3d9d7fe](https://github.com/krizaka/krizaka-platform-kit/commit/3d9d7fefc7ed0cca313db4e91385844ba8233492))
+* **readme:** Krizaka footer and dead tour image removed ([#29](https://github.com/krizaka/krizaka-platform-kit/issues/29)) ([4f4cc35](https://github.com/krizaka/krizaka-platform-kit/commit/4f4cc3507975b678e1097239a6541110d4bd3973))
+* **readme:** OpenSSF Scorecard badge ([#22](https://github.com/krizaka/krizaka-platform-kit/issues/22)) ([9df0f4d](https://github.com/krizaka/krizaka-platform-kit/commit/9df0f4da871c2ce3f88df4068074eb8a67e2a8fd))
+* **readme:** the new Krizaka mark, light and dark, from the organisation profile ([#9](https://github.com/krizaka/krizaka-platform-kit/issues/9)) ([b353f8e](https://github.com/krizaka/krizaka-platform-kit/commit/b353f8e115d301d03f6c20c11aa609dc57179734))
+
 ## [0.2.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.1.0...v0.2.0) (2026-10-10)
 
 
