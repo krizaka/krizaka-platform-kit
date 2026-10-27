@@ -16,9 +16,21 @@
   }, {
     "artifact" : "krizaka-security",
     "properties" : [ {
+      "name" : "krizaka.security.jwt.audience",
+      "type" : "java.lang.String",
+      "description" : "Optional with {@code jwk-set-uri}: when set, the {@code aud} that must be present."
+    }, {
+      "name" : "krizaka.security.jwt.issuer",
+      "type" : "java.lang.String",
+      "description" : "Required with {@code jwk-set-uri}: the only {@code iss} accepted."
+    }, {
+      "name" : "krizaka.security.jwt.jwk-set-uri",
+      "type" : "java.lang.String",
+      "description" : "The issuer's JWKS endpoint ({@code /.well-known/jwks.json}). Only ES256 tokens are accepted in this mode; keys are matched by {@code kid}, and an unknown {@code kid} triggers a (rate limited) refresh so rotation needs no restart."
+    }, {
       "name" : "krizaka.security.jwt.secret",
       "type" : "java.lang.String",
-      "description" : "Shared HMAC-SHA256 secret session tokens are verified with, at least 32 characters (256 bits). Setting it switches local token verification on."
+      "description" : "Legacy shared HMAC-SHA256 secret, at least 32 characters (256 bits). Whoever can verify with it can also mint."
     } ],
     "hints" : [ ]
   }, {
