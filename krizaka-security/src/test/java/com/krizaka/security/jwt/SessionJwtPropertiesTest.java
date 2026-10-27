@@ -12,23 +12,25 @@ class SessionJwtPropertiesTest {
   @Test
   void acceptsASecretOfThirtyTwoCharacters() {
     assertThat(SECRET).hasSize(SessionJwtProperties.MINIMUM_SECRET_LENGTH);
-    assertThat(new SessionJwtProperties(SECRET).secret()).isEqualTo(SECRET);
+    assertThat(new SessionJwtProperties(SECRET, null, null, null).secret()).isEqualTo(SECRET);
   }
 
   @Test
   void refusesAShorterSecret() {
     assertThatIllegalArgumentException()
-        .isThrownBy(() -> new SessionJwtProperties(SECRET.substring(1)))
+        .isThrownBy(() -> new SessionJwtProperties(SECRET.substring(1), null, null, null))
         .withMessageContaining("at least 32 characters");
   }
 
   @Test
   void refusesAMissingSecret() {
-    assertThatIllegalArgumentException().isThrownBy(() -> new SessionJwtProperties(null));
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> new SessionJwtProperties(null, null, null, null));
   }
 
   @Test
   void neverPrintsTheSecret() {
-    assertThat(new SessionJwtProperties(SECRET).toString()).doesNotContain(SECRET);
+    assertThat(new SessionJwtProperties(SECRET, null, null, null).toString())
+        .doesNotContain(SECRET);
   }
 }

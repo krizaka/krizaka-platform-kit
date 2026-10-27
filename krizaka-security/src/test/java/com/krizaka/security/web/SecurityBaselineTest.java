@@ -133,7 +133,7 @@ class SecurityBaselineTest {
 
     @Bean
     JwtDecoder sessionJwtDecoder() {
-      return sessionJwt.sessionJwtDecoder(new SessionJwtProperties(SECRET));
+      return sessionJwt.sessionJwtDecoder(new SessionJwtProperties(SECRET, null, null, null));
     }
 
     @Bean

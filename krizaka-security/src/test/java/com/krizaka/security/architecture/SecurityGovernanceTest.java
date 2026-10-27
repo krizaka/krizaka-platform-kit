@@ -59,4 +59,24 @@ class SecurityGovernanceTest {
     assertDoesNotThrow(
         () -> ArchitectureRules.noEnvironmentOutsideConfigRule("..config..").check(classes));
   }
+
+  @Test
+  @DisplayName("The HS256 shared-secret API is used by SharedSecretDecoder only (ADR-001)")
+  void sharedSecretApiIsConfinedToTheLegacyDecoder() {
+    assertDoesNotThrow(
+        () ->
+            com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses()
+                .that()
+                .doNotHaveFullyQualifiedName("com.krizaka.security.jwt.SharedSecretDecoder")
+                .should()
+                .callMethodWhere(
+                    com.tngtech.archunit.core.domain.JavaCall.Predicates.target(
+                        com.tngtech.archunit.core.domain.properties.HasName.Predicates.name(
+                            "withSecretKey")))
+                .orShould()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName("org.springframework.security.oauth2.jose.jws.MacAlgorithm")
+                .because("session tokens are verified with the issuer's keys, not a shared secret")
+                .check(classes));
+  }
 }
