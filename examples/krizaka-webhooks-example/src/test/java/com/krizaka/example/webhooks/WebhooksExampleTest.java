@@ -14,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
 /** The example over HTTP: the kit's sender calls the kit's receiver, and a forgery is refused. */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = "APP_WEBHOOKS_SECRET=example-test-secret")
 class WebhooksExampleTest {
 
   private static final String BODY = "{\"type\":\"payment.settled\",\"amount\":4200}";
