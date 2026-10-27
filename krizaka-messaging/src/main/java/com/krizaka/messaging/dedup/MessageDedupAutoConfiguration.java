@@ -46,6 +46,18 @@ public class MessageDedupAutoConfiguration {
     return ObservedMessageDedup.of(new InMemoryMessageDedup(), observations.getIfAvailable());
   }
 
+  /**
+   * Claims held in memory, as 0.2.0 declared the bean, without observations.
+   *
+   * @return the in-memory deduplication service
+   * @deprecated since 0.3.0, kept so 0.2.0 callers still link; the bean is declared by {@link
+   *     #inMemoryMessageDedup(ObjectProvider)}
+   */
+  @Deprecated(since = "0.3.0")
+  public MessageDedup inMemoryMessageDedup() {
+    return new InMemoryMessageDedup();
+  }
+
   /** Claims stored in the application's database ({@code store=jdbc}). */
   @Configuration(proxyBeanMethods = false)
   @ConditionalOnClass(name = JDBC_TEMPLATE)
