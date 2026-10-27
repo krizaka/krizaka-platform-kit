@@ -59,6 +59,41 @@ public class OutboxAutoConfiguration {
       ObjectProvider<PlatformTransactionManager> transactionManager,
       ObjectProvider<ObservationRegistry> observations,
       OutboxProperties properties) {
+    return relayScheduler(
+        stores,
+        amqp,
+        transactionManager,
+        observations.getIfAvailable(() -> ObservationRegistry.NOOP),
+        properties);
+  }
+
+  /**
+   * The scheduler as 0.2.0 declared it, without observations.
+   *
+   * @param stores the application's outbox stores; none means nothing is scheduled
+   * @param amqp where rows are published
+   * @param transactionManager the transaction each batch runs in
+   * @param properties intervals, batch size, retention and lease
+   * @return the scheduler, started with the application context
+   * @deprecated since 0.3.0, kept so 0.2.0 callers still link; the bean is declared by {@link
+   *     #outboxRelayScheduler(ObjectProvider, ObjectProvider, ObjectProvider, ObjectProvider,
+   *     OutboxProperties)}
+   */
+  @Deprecated(since = "0.3.0")
+  public OutboxRelayScheduler outboxRelayScheduler(
+      ObjectProvider<OutboxStore> stores,
+      ObjectProvider<AmqpTemplate> amqp,
+      ObjectProvider<PlatformTransactionManager> transactionManager,
+      OutboxProperties properties) {
+    return relayScheduler(stores, amqp, transactionManager, ObservationRegistry.NOOP, properties);
+  }
+
+  private static OutboxRelayScheduler relayScheduler(
+      ObjectProvider<OutboxStore> stores,
+      ObjectProvider<AmqpTemplate> amqp,
+      ObjectProvider<PlatformTransactionManager> transactionManager,
+      ObservationRegistry registry,
+      OutboxProperties properties) {
     List<OutboxStore> declared = stores.orderedStream().toList();
     if (declared.isEmpty()) {
       return new OutboxRelayScheduler(
@@ -69,7 +104,6 @@ public class OutboxAutoConfiguration {
     TransactionTemplate transactions =
         new TransactionTemplate(
             required(transactionManager.getIfUnique(), "a single PlatformTransactionManager"));
-    ObservationRegistry registry = observations.getIfAvailable(() -> ObservationRegistry.NOOP);
     List<OutboxRelay> relays =
         declared.stream()
             .map(

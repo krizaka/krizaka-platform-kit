@@ -38,6 +38,25 @@ class OutboxAutoConfigurationTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
+  void the020BeanMethodStillLinksAndBuildsTheSameScheduler() {
+    runner
+        .withBean(OutboxStore.class, InMemoryOutboxStore::new)
+        .withBean(AmqpTemplate.class, () -> mock(AmqpTemplate.class))
+        .withBean(PlatformTransactionManager.class, () -> mock(PlatformTransactionManager.class))
+        .run(
+            context ->
+                assertThat(
+                        new OutboxAutoConfiguration()
+                            .outboxRelayScheduler(
+                                context.getBeanProvider(OutboxStore.class),
+                                context.getBeanProvider(AmqpTemplate.class),
+                                context.getBeanProvider(PlatformTransactionManager.class),
+                                context.getBean(OutboxProperties.class)))
+                    .isNotNull());
+  }
+
+  @Test
   void aStoreWithoutABrokerFailsAtStartup() {
     runner
         .withBean(OutboxStore.class, InMemoryOutboxStore::new)

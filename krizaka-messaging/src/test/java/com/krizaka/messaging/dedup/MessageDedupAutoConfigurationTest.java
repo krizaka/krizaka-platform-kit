@@ -32,6 +32,13 @@ class MessageDedupAutoConfigurationTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
+  void the020BeanMethodStillLinks() {
+    assertThat(new MessageDedupAutoConfiguration().inMemoryMessageDedup())
+        .isInstanceOf(InMemoryMessageDedup.class);
+  }
+
+  @Test
   void jdbcStore() {
     runner
         .withPropertyValues("krizaka.messaging.dedup.store=jdbc")
