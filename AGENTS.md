@@ -68,3 +68,5 @@ The org code rules (addendum 2026-10-15) are checked by tools, not by review.
 3. Inside the Orazaka workspace, `./mvnw install` from the root is green: every consumer still builds and its governance
    rules (`KIT-001`…`KIT-004`) pass.
 4. [README.md](README.md) and [CHANGELOG.md](CHANGELOG.md) describe the change.
+
+**Repository layout:** the root follows [krizaka/.github `docs/standards/repo-layout.md`](https://github.com/krizaka/.github/blob/main/docs/standards/repo-layout.md); the CI guard `check-repo-layout` fails on a stray root file, and a justified extra is declared in `.repo-layout.json` with its why.
