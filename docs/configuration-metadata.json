@@ -18,15 +18,18 @@
     "properties" : [ {
       "name" : "krizaka.security.jwt.audience",
       "type" : "java.lang.String",
-      "description" : "Optional with {@code jwk-set-uri}: when set, the {@code aud} that must be present."
+      "description" : "Optional with 'jwk-set-uri': when set, the 'aud' that must be present; empty by default.",
+      "defaultValue" : ""
     }, {
       "name" : "krizaka.security.jwt.issuer",
       "type" : "java.lang.String",
-      "description" : "Required with {@code jwk-set-uri}: the only {@code iss} accepted."
+      "description" : "Required with 'jwk-set-uri': the only 'iss' accepted; empty by default.",
+      "defaultValue" : ""
     }, {
       "name" : "krizaka.security.jwt.jwk-set-uri",
       "type" : "java.lang.String",
-      "description" : "The issuer's JWKS endpoint ({@code /.well-known/jwks.json}). Only ES256 tokens are accepted in this mode; keys are matched by {@code kid}, and an unknown {@code kid} triggers a (rate limited) refresh so rotation needs no restart."
+      "description" : "The issuer's JWKS endpoint ('/.well-known/jwks.json'); empty by default, which leaves this mode off. Only ES256 tokens are accepted in this mode; keys are matched by 'kid', and an unknown 'kid' triggers a (rate limited) refresh so rotation needs no restart.",
+      "defaultValue" : ""
     }, {
       "name" : "krizaka.security.jwt.secret",
       "type" : "java.lang.String",

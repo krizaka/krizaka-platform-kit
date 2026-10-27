@@ -2,6 +2,7 @@ package com.krizaka.security.jwt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
  * How a service verifies session tokens ({@code krizaka.security.jwt}): either against the issuer's
@@ -13,16 +14,19 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
  *
  * @param secret Legacy shared HMAC-SHA256 secret, at least 32 characters (256 bits). Whoever can
  *     verify with it can also mint.
- * @param jwkSetUri The issuer's JWKS endpoint ({@code /.well-known/jwks.json}). Only ES256 tokens
- *     are accepted in this mode; keys are matched by {@code kid}, and an unknown {@code kid}
- *     triggers a (rate limited) refresh so rotation needs no restart.
- * @param issuer Required with {@code jwk-set-uri}: the only {@code iss} accepted.
- * @param audience Optional with {@code jwk-set-uri}: when set, the {@code aud} that must be
- *     present.
+ * @param jwkSetUri The issuer's JWKS endpoint ('/.well-known/jwks.json'); empty by default, which
+ *     leaves this mode off. Only ES256 tokens are accepted in this mode; keys are matched by 'kid',
+ *     and an unknown 'kid' triggers a (rate limited) refresh so rotation needs no restart.
+ * @param issuer Required with 'jwk-set-uri': the only 'iss' accepted; empty by default.
+ * @param audience Optional with 'jwk-set-uri': when set, the 'aud' that must be present; empty by
+ *     default.
  */
 @ConfigurationProperties(prefix = "krizaka.security.jwt")
 public record SessionJwtProperties(
-    String secret, String jwkSetUri, String issuer, String audience) {
+    String secret,
+    @DefaultValue("") String jwkSetUri,
+    @DefaultValue("") String issuer,
+    @DefaultValue("") String audience) {
 
   /**
    * The pre-JWKS shape, kept for binary compatibility: the shared HS256 secret alone.
