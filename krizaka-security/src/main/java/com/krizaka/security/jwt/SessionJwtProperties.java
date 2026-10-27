@@ -1,6 +1,7 @@
 package com.krizaka.security.jwt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
 /**
  * How a service verifies session tokens ({@code krizaka.security.jwt}): either against the issuer's
@@ -23,6 +24,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record SessionJwtProperties(
     String secret, String jwkSetUri, String issuer, String audience) {
 
+  /**
+   * The pre-JWKS shape, kept for binary compatibility: the shared HS256 secret alone.
+   *
+   * @param secret the shared HMAC-SHA256 secret, at least 32 characters
+   * @deprecated use the four-argument form; this one only selects the legacy secret mode
+   */
+  @Deprecated
+  public SessionJwtProperties(String secret) {
+    this(secret, null, null, null);
+  }
+
   /** The minimum secret length, in characters, for a 256-bit HS256 key. */
   public static final int MINIMUM_SECRET_LENGTH = 32;
 
@@ -32,6 +44,7 @@ public record SessionJwtProperties(
    * @throws IllegalArgumentException when both or neither mode is set, the secret is short, or
    *     {@code jwk-set-uri} comes without an {@code issuer}
    */
+  @ConstructorBinding
   public SessionJwtProperties {
     secret = blankToNull(secret);
     jwkSetUri = blankToNull(jwkSetUri);
