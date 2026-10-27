@@ -1,6 +1,9 @@
 package com.krizaka.security.web;
 
+import java.util.Map;
+import java.util.Set;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -69,6 +72,29 @@ public final class SecurityBaseline {
                   .AuthorizationManagerRequestMatcherRegistry>
           serviceRules)
       throws Exception {
+    return apply(http, Map.of(), serviceRules);
+  }
+
+  /**
+   * The baseline with {@code allowed-callers} (ADR-001): on each listed internal path only the
+   * named callers (the token's {@code sub}) are let through, in addition to the {@code SERVICE}
+   * authority. An internal path with no entry stays open to any service token.
+   *
+   * @param http the filter chain under construction
+   * @param allowedCallers path pattern (under {@code /internal/v1/}) to the callers allowed there
+   * @param serviceRules the service's own matchers, as in {@link #apply(HttpSecurity, Customizer)}
+   * @return the same builder
+   * @throws Exception when Spring Security refuses the configuration
+   */
+  @SuppressWarnings("java:S4502") // CSRF protects cookie sessions; these APIs are token-only.
+  public static HttpSecurity apply(
+      HttpSecurity http,
+      Map<String, Set<String>> allowedCallers,
+      Customizer<
+              AuthorizeHttpRequestsConfigurer<HttpSecurity>
+                  .AuthorizationManagerRequestMatcherRegistry>
+          serviceRules)
+      throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -77,9 +103,18 @@ public final class SecurityBaseline {
               auth.requestMatchers(HttpMethod.OPTIONS, "/**")
                   .permitAll()
                   .requestMatchers(PUBLIC_PATHS)
-                  .permitAll()
-                  .requestMatchers(INTERNAL_PATHS)
-                  .hasAuthority(SERVICE_AUTHORITY);
+                  .permitAll();
+              allowedCallers.forEach(
+                  (path, callers) ->
+                      auth.requestMatchers(path)
+                          .access(
+                              (authentication, context) ->
+                                  new AuthorizationDecision(
+                                      authentication.get().getAuthorities().stream()
+                                              .anyMatch(
+                                                  a -> SERVICE_AUTHORITY.equals(a.getAuthority()))
+                                          && callers.contains(authentication.get().getName()))));
+              auth.requestMatchers(INTERNAL_PATHS).hasAuthority(SERVICE_AUTHORITY);
               serviceRules.customize(auth);
               auth.anyRequest().authenticated();
             });
