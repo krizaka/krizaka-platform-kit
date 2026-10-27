@@ -6,7 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
-/** Sonar S6718: the example's configuration carries no webhook secret, it reads one from the environment. */
+/**
+ * Sonar S6718: the example's configuration carries no webhook secret, it reads one from the
+ * environment.
+ */
 class NoSecretInConfigTest {
 
   @Test
