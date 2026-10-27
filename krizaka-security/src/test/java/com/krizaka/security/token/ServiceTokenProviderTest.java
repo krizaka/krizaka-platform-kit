@@ -20,7 +20,8 @@ class ServiceTokenProviderTest {
   private static final String SECRET = "krizaka-test-secret-at-least-32-characters!";
 
   private final JwtDecoder decoder =
-      new SessionJwtAutoConfiguration().sessionJwtDecoder(new SessionJwtProperties(SECRET));
+      new SessionJwtAutoConfiguration()
+          .sessionJwtDecoder(new SessionJwtProperties(SECRET, null, null, null));
 
   @Test
   void mintsATokenTheSessionDecoderAcceptsWithTheServiceRole() {
