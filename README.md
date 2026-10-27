@@ -359,3 +359,5 @@ Issues and pull requests are welcome — see the organisation's
 ---
 
 <sub>A Krizaka open-source project · [krizaka.com](https://www.krizaka.com) · Apache-2.0</sub>
+
+The Krizaka names and birds are not licensed by Apache-2.0 (s. 6): [trademark policy](https://github.com/krizaka/.github/blob/main/TRADEMARKS.md).
