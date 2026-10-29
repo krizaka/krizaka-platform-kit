@@ -52,7 +52,10 @@ public final class ClientIpKeyResolver implements RateLimitKeyResolver {
     if (forwarded == null || forwarded.isBlank()) {
       return peer;
     }
-    String[] hops = forwarded.split(",");
+    return forwardedClient(forwarded.split(","), peer);
+  }
+
+  private String forwardedClient(String[] hops, String peer) {
     for (int i = hops.length - 1; i >= 0; i--) {
       String hop = literal(hops[i]);
       if (hop == null) {
