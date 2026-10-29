@@ -1,0 +1,5 @@
+# Fixtures found by the org secret scan in history: documentation examples and test values (reviewed 2026-10-29), not credentials.
+3776a623b09f0d8a63285f59a648f5e35c93a7fe:examples/krizaka-webhooks-example/src/main/resources/application.yml:generic-api-key:7
+3776a623b09f0d8a63285f59a648f5e35c93a7fe:examples/krizaka-webhooks-example/src/main/resources/application.yml:generic-api-key:9
+3776a623b09f0d8a63285f59a648f5e35c93a7fe:krizaka-webhooks/src/test/java/com/krizaka/webhooks/WebhookSignatureTest.java:generic-api-key:11
+3776a623b09f0d8a63285f59a648f5e35c93a7fe:krizaka-webhooks/src/test/java/com/krizaka/webhooks/WebhookSignatureTest.java:generic-api-key:17
