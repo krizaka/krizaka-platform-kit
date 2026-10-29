@@ -14,7 +14,7 @@ services, where one copy drifting is a defect. It does not belong here when the 
 context's datasource, queues and outbox schema are its own (ADR-058 in the Orazaka workspace; superseded in part by
 ADR-073, which created this kit).
 
-- **No product vocabulary.** No `orazaka`, `orochia`, exchange names, queue names, routing keys or table names other
+- **No product vocabulary.** No `orazaka`, exchange names, queue names, routing keys or table names other
   than documented defaults. The kit is configured by `krizaka.*` properties.
 - **Declared, never inferred.** A behaviour that changes a guarantee (which dedup store, whether the relay runs) is a
   property the application sets; the kit never picks one from what happens to be on the classpath, and a missing
