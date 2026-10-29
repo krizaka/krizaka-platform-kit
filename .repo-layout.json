@@ -1,0 +1,6 @@
+{
+  "kind": "maven",
+  "allow": [
+    { "path": "rewrite.yml", "why": "OpenRewrite recipe configuration, read by rewrite-maven-plugin from the project root (states the import layout so rewrite:dryRun does not depend on the runner)" }
+  ]
+}
