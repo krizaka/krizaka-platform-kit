@@ -52,12 +52,7 @@ public final class KrizakaQueues {
   public static Declarables consumer(
       MessagingExchanges exchanges, String queue, String... routingKeys) {
     Objects.requireNonNull(exchanges, "exchanges");
-    if (queue == null || queue.isBlank()) {
-      throw new IllegalArgumentException("queue is required");
-    }
-    if (routingKeys == null || routingKeys.length == 0) {
-      throw new IllegalArgumentException("queue " + queue + " needs at least one routing key");
-    }
+    requireQueueAndKeys(queue, routingKeys);
     String deadLetters = deadLetterQueue(queue);
     Queue main =
         QueueBuilder.durable(queue)
@@ -73,12 +68,27 @@ public final class KrizakaQueues {
         new ArrayList<>(
             List.of(events, dlx, main, dlq, BindingBuilder.bind(dlq).to(dlx).with(deadLetters)));
     for (String key : routingKeys) {
-      if (key == null || key.isBlank()) {
-        throw new IllegalArgumentException("queue " + queue + " has a blank routing key");
-      }
       declarables.add(BindingBuilder.bind(main).to(events).with(key));
     }
     return new Declarables(declarables);
+  }
+
+  private static void requireQueueAndKeys(String queue, String[] routingKeys) {
+    if (queue == null || queue.isBlank()) {
+      throw new IllegalArgumentException("queue is required");
+    }
+    requireKeys(queue, routingKeys);
+  }
+
+  private static void requireKeys(String queue, String[] routingKeys) {
+    if (routingKeys == null || routingKeys.length == 0) {
+      throw new IllegalArgumentException("queue " + queue + " needs at least one routing key");
+    }
+    for (String key : routingKeys) {
+      if (key == null || key.isBlank()) {
+        throw new IllegalArgumentException("queue " + queue + " has a blank routing key");
+      }
+    }
   }
 
   /**
