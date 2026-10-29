@@ -102,27 +102,31 @@ public record Cursor(String after, int limit) {
     if (token == null || token.isEmpty() || token.length() > 2 * MAX_KEY_LENGTH) {
       throw new InvalidCursorException("malformed cursor");
     }
-    String payload;
-    try {
-      payload = new String(DECODER.decode(token), StandardCharsets.UTF_8);
-    } catch (IllegalArgumentException e) {
-      throw new InvalidCursorException("malformed cursor");
-    }
-    String[] parts = payload.split("\\|", 3);
-    if (parts.length < 2 || !VERSION.equals(parts[0])) {
-      throw new InvalidCursorException("malformed cursor");
-    }
-    Cursor cursor;
-    try {
-      int limit = Integer.parseInt(parts[1]);
-      cursor = new Cursor(parts.length == 3 ? parts[2] : null, limit);
-    } catch (NumberFormatException e) {
-      throw new InvalidCursorException("malformed cursor");
-    }
+    Cursor cursor = parse(payloadOf(token));
     if (!cursor.encode().equals(token)) {
       throw new InvalidCursorException("malformed cursor");
     }
     return cursor;
+  }
+
+  private static String payloadOf(String token) {
+    try {
+      return new String(DECODER.decode(token), StandardCharsets.UTF_8);
+    } catch (IllegalArgumentException e) {
+      throw new InvalidCursorException("malformed cursor");
+    }
+  }
+
+  private static Cursor parse(String payload) {
+    String[] parts = payload.split("\\|", 3);
+    if (parts.length < 2 || !VERSION.equals(parts[0])) {
+      throw new InvalidCursorException("malformed cursor");
+    }
+    try {
+      return new Cursor(parts.length == 3 ? parts[2] : null, Integer.parseInt(parts[1]));
+    } catch (NumberFormatException e) {
+      throw new InvalidCursorException("malformed cursor");
+    }
   }
 
   /**

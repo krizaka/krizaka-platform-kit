@@ -94,28 +94,42 @@ public final class WebhookVerifier {
       throw new InvalidWebhookException(
           "The webhook-id, webhook-timestamp and webhook-signature headers are required.");
     }
-    long seconds;
-    try {
-      seconds = Long.parseLong(timestamp.strip());
-    } catch (NumberFormatException e) {
-      throw new InvalidWebhookException("The webhook-timestamp is not a number of seconds.");
+    long seconds = parseSeconds(timestamp);
+    requireWithinTolerance(seconds);
+    String content = body == null ? "" : body;
+    if (!anySecretSigns(id, seconds, content, signatures)) {
+      throw new InvalidWebhookException("No webhook-signature matches.");
     }
+    return id;
+  }
+
+  private void requireWithinTolerance(long seconds) {
     long skew = Math.abs(clock.instant().getEpochSecond() - seconds);
     if (skew > tolerance.toSeconds()) {
       throw new InvalidWebhookException("The webhook-timestamp is outside the tolerance.");
     }
-    String content = body == null ? "" : body;
+  }
+
+  private static long parseSeconds(String timestamp) {
+    try {
+      return Long.parseLong(timestamp.strip());
+    } catch (NumberFormatException e) {
+      throw new InvalidWebhookException("The webhook-timestamp is not a number of seconds.");
+    }
+  }
+
+  private boolean anySecretSigns(String id, long seconds, String content, String signatures) {
     for (String secret : secrets) {
       byte[] expected =
           WebhookSignature.sign(secret, id, seconds, content).getBytes(StandardCharsets.UTF_8);
       for (String candidate : signatures.strip().split("\\s+")) {
         if (candidate.startsWith("v1,")
             && MessageDigest.isEqual(expected, candidate.getBytes(StandardCharsets.UTF_8))) {
-          return id;
+          return true;
         }
       }
     }
-    throw new InvalidWebhookException("No webhook-signature matches.");
+    return false;
   }
 
   private static boolean blank(String value) {
