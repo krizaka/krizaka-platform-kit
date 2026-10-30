@@ -18,7 +18,7 @@
          here, not inherited, so that a release moves the kit and never the krizaka-parent it is
          built on: that one moves deliberately, with krizaka-build.version below (the same
          krizaka-build release), and must be a release on Maven Central before the kit is tagged. -->
-    <version>0.3.0</version>
+    <version>0.4.0</version>
     <packaging>pom</packaging>
     <name>Krizaka Platform Kit</name>
     <description>Cross-cutting building blocks for Spring Boot services: stateless JWT security with one baseline, service-to-service tokens, idempotent message consumption, a transactional outbox relay and the HTTP baseline (Problem Details, request correlation, Jackson defaults, cursor pagination, declared CORS).</description>
