@@ -1,28 +1,7 @@
-<!-- krizaka-header -->
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/krizaka/.github/main/profile/assets/krizaka-dark.svg">
-  <img src="https://raw.githubusercontent.com/krizaka/.github/main/profile/assets/krizaka-light.svg" alt="Krizaka" width="96">
-</picture>
-
 # Krizaka Notifications
 
-**Publish an event; the right message reaches the right channel.**
+> Modules `krizaka-notifications-api` and `krizaka-notifications-service` of krizaka-platform-kit. They were the `krizaka/krizaka-notifications` repository until 2026-10-30 (history kept in this repository; same Maven coordinates). Build: `./mvnw verify -pl krizaka-notifications-service -am`.
 
-E-mail, SMS and webhooks behind one delivery port, driven by your domain events or by explicit requests over AMQP —
-templated, localised, idempotent, and never silently dropped.
-
-[![CI](https://github.com/krizaka/krizaka-notifications/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-notifications/actions/workflows/ci.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/krizaka/krizaka-notifications/badge)](https://scorecard.dev/viewer/?uri=github.com/krizaka/krizaka-notifications)
-[![Maven Central](https://img.shields.io/maven-central/v/com.krizaka/krizaka-notifications-api?color=196df5&label=maven%20central)](https://central.sonatype.com/namespace/com.krizaka)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-notifications&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-notifications) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-notifications&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-notifications) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-notifications&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-notifications) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-notifications&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-notifications) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-notifications&metric=coverage)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-notifications)
-
-[Open source at Krizaka](https://www.krizaka.com/en/open-source) · [Website](https://www.krizaka.com) · [Krizaka on GitHub](https://github.com/krizaka)
-
-</div>
-<!-- /krizaka-header -->
 
 Built for and used by [Orazaka](https://github.com/krizaka/orazaka); usable by any application that speaks AMQP.
 

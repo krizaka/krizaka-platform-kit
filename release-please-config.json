@@ -19,7 +19,9 @@
         "starters/krizaka-spring-boot-starter-rabbitmq/pom.xml",
         "starters/krizaka-spring-boot-starter-observability/pom.xml",
         "starters/krizaka-spring-boot-starter-app-config/pom.xml",
-        "examples/krizaka-starters-example/pom.xml"
+        "examples/krizaka-starters-example/pom.xml",
+        "krizaka-notifications-api/pom.xml",
+        "krizaka-notifications-service/pom.xml"
       ]
     }
   }

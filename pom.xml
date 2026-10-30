@@ -53,6 +53,12 @@
         <!-- The krizaka-build release the kit is built on: krizaka-test-support, at the version of
              the krizaka-parent above. -->
         <krizaka-build.version>0.2.0</krizaka-build.version>
+        <archunit.version>1.5.1</archunit.version>
+        <!-- What reaches Maven Central: the libraries, never a runnable service. A *-service module
+             sets maven.deploy.skip (the services ship as Docker images); every other module with sources is
+             published, and its jar must stay under krizaka.publishable.max-size (enforcer, verify phase). -->
+        <maven.deploy.skip>false</maven.deploy.skip>
+        <krizaka.publishable.max-size>5242880</krizaka.publishable.max-size>
     </properties>
 
     <modules>
@@ -66,6 +72,8 @@
         <module>krizaka-webhooks</module>
         <module>krizaka-ratelimit</module>
         <module>starters</module>
+        <module>krizaka-notifications-api</module>
+        <module>krizaka-notifications-service</module>
         <module>examples/krizaka-starters-example</module>
         <module>examples/krizaka-idempotency-example</module>
         <module>examples/krizaka-webhooks-example</module>
@@ -129,6 +137,20 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- The released Krizaka artifacts the notifications service tests against (krizaka-users-api). -->
+            <dependency>
+                <groupId>com.krizaka</groupId>
+                <artifactId>krizaka-bom</artifactId>
+                <version>${krizaka-build.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -141,6 +163,7 @@
                     <artifactId>central-publishing-maven-plugin</artifactId>
                     <configuration>
                         <excludeArtifacts>
+                            <excludeArtifact>krizaka-notifications-service</excludeArtifact>
                             <excludeArtifact>krizaka-starters-example</excludeArtifact>
                             <excludeArtifact>krizaka-idempotency-example</excludeArtifact>
                             <excludeArtifact>krizaka-webhooks-example</excludeArtifact>
@@ -148,7 +171,75 @@
                         </excludeArtifacts>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                    <executions>
+                        <!-- /actuator/info says which build is running. -->
+                        <execution>
+                            <id>build-info</id>
+                            <goals>
+                                <goal>build-info</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <!-- The recipes come from krizaka-parent; the import layout is stated in rewrite.yml. -->
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <configuration>
+                    <activeStyles>
+                        <style>com.krizaka.style.GoogleJavaImportLayout</style>
+                    </activeStyles>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
+    <profiles>
+        <!-- Publishable-artifact guard: a module with Java sources that Maven Central receives
+             (maven.deploy.skip=false) must produce a jar under 5 MB. Active in every module that
+             has src/main/java; the *-service hosts skip it with their deployment. -->
+        <profile>
+            <id>publishable-artifact-size</id>
+            <activation>
+                <file>
+                    <exists>${basedir}/src/main/java</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>publishable-artifact-size</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${maven.deploy.skip}</skip>
+                                    <rules>
+                                        <requireFilesSize>
+                                            <maxsize>${krizaka.publishable.max-size}</maxsize>
+                                            <files>
+                                                <file>${project.build.directory}/${project.build.finalName}.jar</file>
+                                            </files>
+                                            <message>A published artifact must stay small: a runnable (fat) jar never goes to Maven Central. Set maven.deploy.skip=true in a service module; it ships as a Docker image.</message>
+                                        </requireFilesSize>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
