@@ -52,26 +52,35 @@ public final class ServiceTokenVerifier implements JwtDecoder {
         throw new BadJwtException("A service token must be ES256");
       }
       JWTClaimsSet claims = jws.getJWTClaimsSet();
-      ECPublicKey key = callers.get(claims.getSubject());
-      if (key == null) {
-        throw new BadJwtException("Unknown service caller");
-      }
-      if (!jws.verify(new ECDSAVerifier(key))) {
-        throw new BadJwtException("Invalid service token signature");
-      }
+      requireSignedByKnownCaller(jws, claims);
       Date exp = claims.getExpirationTime();
       if (exp == null || !exp.toInstant().isAfter(clock.instant())) {
         throw new BadJwtException("Service token expired");
       }
-      return Jwt.withTokenValue(token)
-          .headers(h -> h.putAll(jws.getHeader().toJSONObject()))
-          .claims(c -> c.putAll(claims.getClaims()))
-          .subject(claims.getSubject())
-          .issuedAt(claims.getIssueTime() == null ? null : claims.getIssueTime().toInstant())
-          .expiresAt(exp.toInstant())
-          .build();
+      return toJwt(token, jws, claims, exp);
     } catch (ParseException | JOSEException e) {
       throw new BadJwtException("Malformed service token", e);
     }
+  }
+
+  private void requireSignedByKnownCaller(SignedJWT jws, JWTClaimsSet claims) throws JOSEException {
+    ECPublicKey key = callers.get(claims.getSubject());
+    if (key == null) {
+      throw new BadJwtException("Unknown service caller");
+    }
+    if (!jws.verify(new ECDSAVerifier(key))) {
+      throw new BadJwtException("Invalid service token signature");
+    }
+  }
+
+  private static Jwt toJwt(String token, SignedJWT jws, JWTClaimsSet claims, Date exp) {
+    Date issued = claims.getIssueTime();
+    return Jwt.withTokenValue(token)
+        .headers(h -> h.putAll(jws.getHeader().toJSONObject()))
+        .claims(c -> c.putAll(claims.getClaims()))
+        .subject(claims.getSubject())
+        .issuedAt(issued == null ? null : issued.toInstant())
+        .expiresAt(exp.toInstant())
+        .build();
   }
 }
