@@ -20,9 +20,12 @@ concurrency:
 
 jobs:
   maven:
+    permissions:
+      contents: read
+      packages: write
     uses: krizaka/.github/.github/workflows/maven.yml@99281c3f4b46dbe4c645dff053b4bfb387a1403d # main
     with:
-      upstreams: "krizaka-build"
+      registry: github   # GitHub Packages (ADR-019): krizaka-parent and the BOM resolve from there, no upstream checkout
       rewrite: true
       threads: "2"
       sonar: true   # CI analysis with JaCoCo coverage; the merge queue branch is analysed too
