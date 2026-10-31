@@ -5,6 +5,13 @@ artifact is the one `krizaka-bom` carries. Releases are written by
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.5.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.4.3...v0.5.0) (2026-10-31)
+
+
+### Features
+
+* **notifications:** krizaka-notifications joins the kit (history kept, same Maven coordinates) ([#94](https://github.com/krizaka/krizaka-platform-kit/issues/94)) ([e258aff](https://github.com/krizaka/krizaka-platform-kit/commit/e258aff74801ab9ad26f3e8dee2b79f5462bcf9b))
+
 ## [0.4.3](https://github.com/krizaka/krizaka-platform-kit/compare/v0.4.2...v0.4.3) (2026-10-31)
 
 
