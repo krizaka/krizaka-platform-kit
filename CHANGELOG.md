@@ -5,6 +5,13 @@ artifact is the one `krizaka-bom` carries. Releases are written by
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.4.1](https://github.com/krizaka/krizaka-platform-kit/compare/v0.4.0...v0.4.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **build:** module annotationProcessorPaths append to the parent's (NullAway profile, krizaka-build[#121](https://github.com/krizaka/krizaka-platform-kit/issues/121)) ([#79](https://github.com/krizaka/krizaka-platform-kit/issues/79)) ([00b8211](https://github.com/krizaka/krizaka-platform-kit/commit/00b82113da05204377b72f6075de7f451dbb44ea))
+
 ## [0.4.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.3.0...v0.4.0) (2026-10-30)
 
 
