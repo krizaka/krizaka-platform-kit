@@ -23,7 +23,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: krizaka/.github/.github/workflows/maven.yml@99281c3f4b46dbe4c645dff053b4bfb387a1403d # main
+    uses: krizaka/.github/.github/workflows/maven.yml@be08be836bcce567d84a679d3f40aefab79ca4cc # main
     with:
       registry: github   # GitHub Packages (ADR-019): krizaka-parent and the BOM resolve from there
       upstreams: "krizaka-users"   # krizaka-users-api 0.2.0 (the notifications service's contract test) is not released yet: built from main and installed; drop this line once krizaka-users is on GitHub Packages
