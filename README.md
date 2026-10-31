@@ -16,7 +16,7 @@ properties.
 
 [![CI](https://github.com/krizaka/krizaka-platform-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/krizaka-platform-kit/actions/workflows/ci.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/krizaka/krizaka-platform-kit/badge)](https://scorecard.dev/viewer/?uri=github.com/krizaka/krizaka-platform-kit)
-[![Maven Central](https://img.shields.io/maven-central/v/com.krizaka/krizaka-security?color=196df5&label=maven%20central)](https://central.sonatype.com/namespace/com.krizaka)
+[![GitHub Packages](https://img.shields.io/badge/maven-github%20packages-196df5)](https://github.com/orgs/krizaka/packages?repo_name=krizaka-platform-kit)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-platform-kit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-platform-kit) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-platform-kit&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-platform-kit) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-platform-kit&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-platform-kit) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-platform-kit&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-platform-kit) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=krizaka_krizaka-platform-kit&metric=coverage)](https://sonarcloud.io/summary/new_code?id=krizaka_krizaka-platform-kit)
 
@@ -342,9 +342,9 @@ It inherits [`krizaka-parent`](https://github.com/krizaka/krizaka-build): build 
 Pull request titles are [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `feat!:` —
 checked by `commitlint`; the squash merge keeps the title). [release-please](https://github.com/googleapis/release-please)
 keeps a release pull request open on `main`; merging it sets the version in every `pom.xml`, writes the CHANGELOG, tags
-`v<version>` and dispatches CI on that tag, which signs and uploads to the Central Portal (organisation pipeline,
-publication confirmed by hand). Before merging it, the kit's `krizaka-parent` and `krizaka-build.version` must name a
-`krizaka-build` release that is on Maven Central — the release refuses any `-SNAPSHOT` parent.
+`v<version>` and dispatches CI on that tag, which publishes to GitHub Packages (organisation pipeline, ADR-019; the
+registry is the `registry:` input of the workflow). Before merging it, the kit's `krizaka-parent` and `krizaka-build.version` must name a
+`krizaka-build` release on GitHub Packages — the release refuses any `-SNAPSHOT` parent.
 
 ## Contributing
 
