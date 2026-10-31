@@ -27,7 +27,8 @@ public record NotificationRequest(
     String locale,
     Map<String, String> variables) {
 
-  private static final Pattern TEMPLATE_KEY = Pattern.compile("[a-z0-9]+(?:-[a-z0-9]+)*");
+  /** Lower-case words of letters and digits joined by single hyphens (kebab-case). */
+  private static final Pattern TEMPLATE_KEY = Pattern.compile("[a-z0-9-]++");
 
   /** Compact constructor: the request validates itself, so no consumer re-checks it. */
   public NotificationRequest {
@@ -35,7 +36,7 @@ public record NotificationRequest(
     if (recipient == null || recipient.isBlank()) {
       throw new IllegalArgumentException("recipient is required");
     }
-    if (template == null || !TEMPLATE_KEY.matcher(template).matches()) {
+    if (template == null || !isKebabCase(template)) {
       throw new IllegalArgumentException("template must be a lower-kebab-case key: " + template);
     }
     locale =
@@ -47,5 +48,12 @@ public record NotificationRequest(
     }
     variables = variables == null ? Map.of() : Map.copyOf(variables);
     recipient = recipient.strip();
+  }
+
+  private static boolean isKebabCase(String key) {
+    return TEMPLATE_KEY.matcher(key).matches()
+        && !key.startsWith("-")
+        && !key.endsWith("-")
+        && !key.contains("--");
   }
 }

@@ -44,6 +44,8 @@ public record NotificationProperties(
    */
   public record Links(String verifyEmail, String resetPassword) {
 
+    private static final String TOKEN_PLACEHOLDER = "{token}";
+
     public Links {
       requireTokenPlaceholder(verifyEmail, "verify-email");
       requireTokenPlaceholder(resetPassword, "reset-password");
@@ -51,18 +53,18 @@ public record NotificationProperties(
 
     /** The verification link carrying {@code token}. */
     public String verifyEmailUrl(String token) {
-      return verifyEmail.replace("{token}", encode(token));
+      return verifyEmail.replace(TOKEN_PLACEHOLDER, encode(token));
     }
 
     /** The reset link carrying {@code token}. */
     public String resetPasswordUrl(String token) {
-      return resetPassword.replace("{token}", encode(token));
+      return resetPassword.replace(TOKEN_PLACEHOLDER, encode(token));
     }
 
     private static void requireTokenPlaceholder(String url, String name) {
-      if (url == null || !url.contains("{token}")) {
+      if (url == null || !url.contains(TOKEN_PLACEHOLDER)) {
         throw new IllegalArgumentException(
-            "krizaka.notifications.links." + name + " must contain {token}");
+            "krizaka.notifications.links." + name + " must contain " + TOKEN_PLACEHOLDER);
       }
     }
 
