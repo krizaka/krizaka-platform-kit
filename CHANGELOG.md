@@ -5,6 +5,32 @@ artifact is the one `krizaka-bom` carries. Releases are written by
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.4.1](https://github.com/krizaka/krizaka-platform-kit/compare/v0.4.0...v0.4.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **build:** module annotationProcessorPaths append to the parent's (NullAway profile, krizaka-build[#121](https://github.com/krizaka/krizaka-platform-kit/issues/121)) ([#79](https://github.com/krizaka/krizaka-platform-kit/issues/79)) ([00b8211](https://github.com/krizaka/krizaka-platform-kit/commit/00b82113da05204377b72f6075de7f451dbb44ea))
+
+## [0.4.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.3.0...v0.4.0) (2026-10-30)
+
+
+### Features
+
+* **security:** verify session tokens against the issuer's JWKS (ADR-001 slice 1) ([#72](https://github.com/krizaka/krizaka-platform-kit/issues/72)) ([b4d5c72](https://github.com/krizaka/krizaka-platform-kit/commit/b4d5c72cee467cd7e28de8d76eeca3bfe9227793))
+
+
+### Bug Fixes
+
+* **build:** processor paths append to the parent's (NullAway plug-in not found) ([#78](https://github.com/krizaka/krizaka-platform-kit/issues/78)) ([8fd04ce](https://github.com/krizaka/krizaka-platform-kit/commit/8fd04ce77557f929882701ca13b831512985fb4c))
+* **sonar:** vulnerabilities S6718 webhook secrets in example config ([#71](https://github.com/krizaka/krizaka-platform-kit/issues/71)) ([fe91adf](https://github.com/krizaka/krizaka-platform-kit/commit/fe91adfcc17f7febf96189e306a1a534ab191a36))
+
+
+### Documentation
+
+* **adr:** ADR-001 session tokens signed by their issuer only ([#11](https://github.com/krizaka/krizaka-platform-kit/issues/11)) ([#70](https://github.com/krizaka/krizaka-platform-kit/issues/70)) ([dee4711](https://github.com/krizaka/krizaka-platform-kit/commit/dee4711b2054014ebfa6bd290464a386ca603c66))
+* **layout:** point AGENTS.md to the repository layout standard ([#68](https://github.com/krizaka/krizaka-platform-kit/issues/68)) ([a352cd6](https://github.com/krizaka/krizaka-platform-kit/commit/a352cd69a10996e01bdd6d86f5d9fa7644b27b5b))
+
 ## [0.3.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.2.0...v0.3.0) (2026-10-27)
 
 
