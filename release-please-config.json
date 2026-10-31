@@ -13,6 +13,8 @@
         "krizaka-web/pom.xml",
         "krizaka-observability/pom.xml",
         "krizaka-app-config/pom.xml",
+        "krizaka-notifications-api/pom.xml",
+        "krizaka-notifications-service/pom.xml",
         "starters/pom.xml",
         "starters/krizaka-spring-boot-starter-web/pom.xml",
         "starters/krizaka-spring-boot-starter-security/pom.xml",
