@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.krizaka</groupId>
         <artifactId>krizaka-parent</artifactId>
-        <version>0.3.1</version>
+        <version>0.3.4</version>
         <relativePath/>
     </parent>
 
@@ -48,7 +48,7 @@
         <krizaka.security.commons-compress.version>1.28.0</krizaka.security.commons-compress.version>
         <!-- The krizaka-build release the kit is built on: krizaka-test-support, at the version of
              the krizaka-parent above. -->
-        <krizaka-build.version>0.3.1</krizaka-build.version>
+        <krizaka-build.version>0.3.4</krizaka-build.version>
         <archunit.version>1.5.1</archunit.version>
         <!-- What reaches Maven Central: the libraries, never a runnable service. A *-service module
              sets maven.deploy.skip (the services ship as Docker images); every other module with sources is
