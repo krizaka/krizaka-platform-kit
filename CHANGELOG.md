@@ -5,6 +5,13 @@ artifact is the one `krizaka-bom` carries. Releases are written by
 [release-please](https://github.com/googleapis/release-please) from the Conventional Commits merged on `main`; the
 hand-written history is under *Before release-please*.
 
+## [0.6.0](https://github.com/krizaka/krizaka-platform-kit/compare/v0.5.1...v0.6.0) (2026-11-01)
+
+
+### Features
+
+* **security:** a service accepts the SERVICE tokens of its callers by their own public keys ([#111](https://github.com/krizaka/krizaka-platform-kit/issues/111)) ([d3fec01](https://github.com/krizaka/krizaka-platform-kit/commit/d3fec0118f9e8841ddca2cfef0561b4db3a85159))
+
 ## [0.5.1](https://github.com/krizaka/krizaka-platform-kit/compare/v0.5.0...v0.5.1) (2026-10-31)
 
 
