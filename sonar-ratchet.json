@@ -1,0 +1,13 @@
+{
+  "project": "krizaka_krizaka-platform-kit",
+  "counts": {
+    "bugs": 2,
+    "vulnerabilities": 1,
+    "hotspots": 0,
+    "smells_blocker": 10,
+    "smells_critical": 26,
+    "smells_major": 26,
+    "smells_minor": 13,
+    "smells_info": 4
+  }
+}
