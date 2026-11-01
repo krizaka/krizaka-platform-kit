@@ -23,7 +23,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: krizaka/.github/.github/workflows/maven.yml@43aa90918aba0446c0a455194f668846512d3860 # main
+    uses: krizaka/.github/.github/workflows/maven.yml@ad28578bbef6c75bc441abfb1cf753164cd9c438 # main
     with:
       registry: github   # GitHub Packages (ADR-019): krizaka-parent and the BOM resolve from there
       rewrite: true
