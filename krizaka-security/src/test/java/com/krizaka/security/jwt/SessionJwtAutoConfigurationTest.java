@@ -63,4 +63,41 @@ class SessionJwtAutoConfigurationTest {
         .withPropertyValues("krizaka.security.jwt.secret=" + SECRET)
         .run(context -> assertThat(context).hasNotFailed().doesNotHaveBean("sessionJwtDecoder"));
   }
+
+  @Test
+  void callersAndACutoffSelectTheRoutingDecoder() throws Exception {
+    var generator = java.security.KeyPairGenerator.getInstance("EC");
+    generator.initialize(new java.security.spec.ECGenParameterSpec("secp256r1"));
+    String body =
+        java.util.Base64.getEncoder()
+            .encodeToString(generator.generateKeyPair().getPublic().getEncoded());
+    String dashes = "-----";
+    String pem =
+        dashes
+            + "BEGIN PUBLIC KEY"
+            + dashes
+            + "\n"
+            + body
+            + "\n"
+            + dashes
+            + "END PUBLIC KEY"
+            + dashes;
+    runner
+        .withPropertyValues(
+            "krizaka.security.jwt.secret=" + SECRET,
+            "krizaka.security.jwt.hs256-cutoff=2026-12-01T00:00:00Z",
+            "krizaka.security.jwt.callers.studio=" + pem)
+        .run(
+            context ->
+                assertThat(context.getBean(JwtDecoder.class))
+                    .isInstanceOf(RoutingSessionDecoder.class));
+  }
+
+  @Test
+  void aMalformedCallerKeyRefusesToStart() {
+    runner
+        .withPropertyValues(
+            "krizaka.security.jwt.secret=" + SECRET, "krizaka.security.jwt.callers.studio=oops")
+        .run(context -> assertThat(context).hasFailed());
+  }
 }

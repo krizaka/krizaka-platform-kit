@@ -21,6 +21,14 @@
       "description" : "Optional with 'jwk-set-uri': when set, the 'aud' that must be present; empty by default.",
       "defaultValue" : ""
     }, {
+      "name" : "krizaka.security.jwt.callers",
+      "type" : "java.util.Map<java.lang.String,java.lang.String>",
+      "description" : "Optional: the public key (SPKI PEM, P-256) of each calling service by the name it puts in 'sub'. A token signed by one of these keys, carrying exactly the SERVICE role, is accepted beside the sessions; a caller cannot speak for another, an unknown name is refused."
+    }, {
+      "name" : "krizaka.security.jwt.hs256-cutoff",
+      "type" : "java.time.Instant",
+      "description" : "Optional, with 'secret': from this instant the shared secret verifies nothing (ISO-8601). Empty keeps it open until the secret is removed."
+    }, {
       "name" : "krizaka.security.jwt.issuer",
       "type" : "java.lang.String",
       "description" : "Required with 'jwk-set-uri': the only 'iss' accepted; empty by default.",

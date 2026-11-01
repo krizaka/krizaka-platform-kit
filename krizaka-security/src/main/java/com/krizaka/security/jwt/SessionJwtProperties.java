@@ -1,5 +1,7 @@
 package com.krizaka.security.jwt;
 
+import java.time.Instant;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -20,13 +22,34 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param issuer Required with 'jwk-set-uri': the only 'iss' accepted; empty by default.
  * @param audience Optional with 'jwk-set-uri': when set, the 'aud' that must be present; empty by
  *     default.
+ * @param hs256Cutoff Optional, with 'secret': from this instant the shared secret verifies nothing
+ *     (ISO-8601). Empty keeps it open until the secret is removed.
+ * @param callers Optional: the public key (SPKI PEM, P-256) of each calling service by the name it
+ *     puts in 'sub'. A token signed by one of these keys, carrying exactly the SERVICE role, is
+ *     accepted beside the sessions; a caller cannot speak for another, an unknown name is refused.
  */
 @ConfigurationProperties(prefix = "krizaka.security.jwt")
 public record SessionJwtProperties(
     String secret,
     @DefaultValue("") String jwkSetUri,
     @DefaultValue("") String issuer,
-    @DefaultValue("") String audience) {
+    @DefaultValue("") String audience,
+    Instant hs256Cutoff,
+    @DefaultValue Map<String, String> callers) {
+
+  /**
+   * The shape before caller keys, kept for binary compatibility.
+   *
+   * @param secret the legacy shared secret, or null
+   * @param jwkSetUri the issuer's JWKS endpoint, or null
+   * @param issuer the accepted issuer
+   * @param audience the required audience, or null
+   * @deprecated use the six-argument form
+   */
+  @Deprecated
+  public SessionJwtProperties(String secret, String jwkSetUri, String issuer, String audience) {
+    this(secret, jwkSetUri, issuer, audience, null, null);
+  }
 
   /**
    * The pre-JWKS shape, kept for binary compatibility: the shared HS256 secret alone.
@@ -36,7 +59,7 @@ public record SessionJwtProperties(
    */
   @Deprecated
   public SessionJwtProperties(String secret) {
-    this(secret, null, null, null);
+    this(secret, null, null, null, null, null);
   }
 
   /** The minimum secret length, in characters, for a 256-bit HS256 key. */
@@ -54,6 +77,7 @@ public record SessionJwtProperties(
     jwkSetUri = blankToNull(jwkSetUri);
     issuer = blankToNull(issuer);
     audience = blankToNull(audience);
+    callers = callers == null ? Map.of() : Map.copyOf(callers);
     if (secret != null && jwkSetUri != null) {
       throw new IllegalArgumentException(
           "krizaka.security.jwt.secret and krizaka.security.jwt.jwk-set-uri are mutually exclusive");
@@ -85,7 +109,11 @@ public record SessionJwtProperties(
    */
   @Override
   public String toString() {
-    return "SessionJwtProperties[secret=<redacted>, jwkSetUri="
+    return "SessionJwtProperties[secret=<redacted>, callers="
+        + callers.keySet()
+        + ", hs256Cutoff="
+        + hs256Cutoff
+        + ", jwkSetUri="
         + jwkSetUri
         + ", issuer="
         + issuer
