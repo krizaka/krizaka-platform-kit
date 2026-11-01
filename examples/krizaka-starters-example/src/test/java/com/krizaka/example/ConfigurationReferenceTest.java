@@ -49,6 +49,8 @@ class ConfigurationReferenceTest {
   static final Set<String> WITHOUT_DEFAULT =
       Set.of(
           "krizaka.security.jwt.secret",
+          "krizaka.security.jwt.hs256-cutoff",
+          "krizaka.security.jwt.callers",
           "krizaka.observability.product",
           "krizaka.observability.service",
           "krizaka.observability.version",

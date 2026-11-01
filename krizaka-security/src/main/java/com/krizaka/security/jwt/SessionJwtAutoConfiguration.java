@@ -47,9 +47,18 @@ public class SessionJwtAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean(JwtDecoder.class)
   public JwtDecoder sessionJwtDecoder(SessionJwtProperties properties) {
-    return properties.jwkSetUri() != null
-        ? IssuerKeysDecoder.of(properties)
-        : SharedSecretDecoder.of(properties.secret());
+    JwtDecoder session = properties.jwkSetUri() != null ? IssuerKeysDecoder.of(properties) : null;
+    JwtDecoder legacy =
+        properties.secret() != null ? SharedSecretDecoder.of(properties.secret()) : null;
+    if (properties.callers().isEmpty() && properties.hs256Cutoff() == null) {
+      return session != null ? session : legacy;
+    }
+    return new RoutingSessionDecoder(
+        session,
+        legacy,
+        properties.callers(),
+        properties.hs256Cutoff(),
+        java.time.Clock.systemUTC());
   }
 
   /**
